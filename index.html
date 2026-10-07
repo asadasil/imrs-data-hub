@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>IMRS Data Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -461,6 +462,8 @@ var T = {
   dl_off: ["Downloads are off in this view. Use Copy for Excel and paste into a sheet, or try Allow downloads.", "Скачивание отключено в этом окне. Скопируйте данные или разрешите скачивание.", "Bu oynada yuklab olish o‘chirilgan. Ma’lumotni nusxalang yoki yuklab olishga ruxsat bering.", "Бу ойнада юклаб олиш ўчирилган. Маълумотни нусхаланг ёки юклаб олишга рухсат беринг."],
   dl_allow: ["Allow downloads", "Разрешить скачивание", "Yuklab olishga ruxsat berish", "Юклаб олишга рухсат бериш"],
   dl_still_off: ["Downloads are still off. Open the page's Permissions menu, allow downloads, then reload.", "Скачивание всё ещё отключено. Откройте меню «Разрешения», разрешите скачивание и перезагрузите страницу.", "Yuklab olish hali o‘chiq. Ruxsatlar menyusida yuklab olishni yoqing va sahifani qayta yuklang.", "Юклаб олиш ҳали ўчиқ. Рухсатлар менюсида юклаб олишни ёқинг ва саҳифани қайта юкланг."],
+  ask_ext: ["Ask the data ↗", "Спросить данные ↗", "Ma'lumotlardan so'rash ↗", "Маълумотлардан сўраш ↗"],
+  ask_ext_t: ["Opens the claude.ai version of the hub, where Claude answers from this data (needs a Claude account)", "Открывает версию хаба на claude.ai, где Claude отвечает по этим данным (нужен аккаунт Claude)", "Hubning claude.ai versiyasini ochadi, u yerda Claude shu ma'lumotlar asosida javob beradi (Claude hisobi kerak)", "Ҳабнинг claude.ai версиясини очади, у ерда Claude шу маълумотлар асосида жавоб беради (Claude ҳисоби керак)"],
   copy_xl: ["Copy for Excel", "Копировать для Excel", "Excel uchun nusxalash", "Excel учун нусхалаш"],
   copied_xl: ["Copied. Open Excel, click cell A1 and paste (Ctrl+V or ⌘V).", "Скопировано. Откройте Excel, выберите ячейку A1 и вставьте (Ctrl+V или ⌘V).", "Nusxalandi. Excelni oching, A1 katagini tanlang va joylang (Ctrl+V yoki ⌘V).", "Нусхаланди. Excelни очинг, A1 катагини танланг ва жойланг (Ctrl+V ёки ⌘V)."],
   dl_unavail: ["This view of the page cannot save files (this happens inside the Claude desktop and mobile apps and in embedded previews). Open the link in a web browser signed in to claude.ai, or use Copy for Excel and paste into a sheet.", "В этом окне страница не может сохранять файлы (так бывает в приложениях Claude для компьютера и телефона и во встроенном просмотре). Откройте ссылку в браузере, войдя в claude.ai, или нажмите «Копировать для Excel» и вставьте в таблицу.", "Bu oynada sahifa fayl saqlay olmaydi (Claude kompyuter va telefon ilovalarida hamda ichki ko‘rinishda shunday bo‘ladi). Havolani claude.ai ga kirgan holda brauzerda oching yoki «Excel uchun nusxalash»ni bosib, jadvalga joylang.", "Бу ойнада саҳифа файл сақлай олмайди (Claude компьютер ва телефон иловаларида ҳамда ички кўринишда шундай бўлади). Ҳаволани claude.ai га кирган ҳолда браузерда очинг ёки «Excel учун нусхалаш»ни босиб, жадвалга жойланг."],
@@ -740,7 +743,7 @@ function applyLang() {
   $("tab-browse").textContent = t("browse"); $("tab-nowcast").textContent = t("nowcast"); $("tab-compare").textContent = t("compare"); $("tab-sources").textContent = t("sources"); $("tab-about").textContent = t("about");
   Array.prototype.forEach.call(document.querySelectorAll(".langs button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lang") === state.lang ? "true" : "false"); });
   $("more").textContent = t("more");
-  $("askbtn-l").textContent = t("ask");
+  $("askbtn-l").textContent = NATIVE ? t("ask_ext") : t("ask"); if (NATIVE) $("askbtn").title = t("ask_ext_t");
   if (CAT) {
     $("q").placeholder = t("search_ph", { n: big(CAT.totals.datasets) });
     $("stats").textContent = t("stats", { d: big(CAT.totals.datasets), s: big(CAT.totals.series), o: big(CAT.totals.obs), u: fmtDate(CAT.generated) });
@@ -1594,7 +1597,7 @@ function runAsk() {
       })
     .then(done, done);
 }
-$("askbtn").addEventListener("click", function () { if (state.view !== "browse") setView("browse"); renderAsk(); });
+$("askbtn").addEventListener("click", function () { if (NATIVE) { window.open(claudeLink("ask"), "_blank", "noopener"); return; } if (state.view !== "browse") setView("browse"); renderAsk(); });
 
 /* ---------- events ---------- */
 var qTimer;
@@ -1623,6 +1626,7 @@ function routeHash() {
   var h = (location.hash || "").replace("#", "");
   if (h.indexOf("d-") === 0 && BYID[h.slice(2)]) { if (state.view !== "browse") setView("browse"); if (state.sel !== h.slice(2)) openDataset(h.slice(2), false); }
   else if (h.indexOf("c-") === 0) { loadCC().then(function () { var i = +h.slice(2); if (CC.indicators[i]) { CC_OPEN = i; setView("compare", true); } }, function () {}); }
+  else if (h === "ask" && !NATIVE) { if (state.view !== "browse") setView("browse"); renderAsk(); }
   else if (h === "sources" || h === "about" || h === "browse" || h === "compare") setView(h);
   else if (h === "nowcast" || h.indexOf("nowcast/") === 0) setView("nowcast", true, h.slice(8) || "overview");
 }
@@ -1642,6 +1646,11 @@ window.HUB = {
 /* ---------- turning downloads on for a viewer who has them off ---------- */
 var CAN_ASK = !!(window.claude && typeof window.claude.use === "function");
 var NATIVE = !CAN_ASK;
+/* Outside claude.ai the Claude features (Ask the data, Claude-written reports, the lab assistant) hand off to the claude.ai copy of the hub. */
+var CLAUDE_HUB = "https://claude.ai/artifact/LuVXWEszce1zZ92ttbaPF5";
+function claudeLink(hash) { return CLAUDE_HUB + (hash ? "#" + hash : ""); }
+window.HUB.native = NATIVE; window.HUB.claudeLink = claudeLink;
+if (NATIVE) $("askbtn").hidden = false;
 function redrawDetail() { if (state.sel && VIEW.data) drawDetail(BYID[state.sel], VIEW.data); }
 function recheckDownloads(then, reloadIfNull) {
   window.claude.use("downloads").then(function (ns) {
@@ -1689,3 +1698,5 @@ getJSON("data/catalog.gz.txt").then(function (cat) {
 });
 })();
 </script>
+
+</body></html>
