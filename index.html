@@ -1,0 +1,1691 @@
+<title>IMRS Data Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Unbounded:wght@600&display=swap">
+<style>
+:root {
+  --bg: #f2f5f5;
+  --surface: #ffffff;
+  --surface-2: #e9eff0;
+  --surface-3: #dde6e8;
+  --ink: #132129;
+  --ink-2: #3b4b54;
+  --muted: #5f707a;
+  --rule: #d4dfe1;
+  --rule-strong: #a9b8bd;
+  --accent: #0b6e78;
+  --accent-soft: #dcefef;
+  --accent-ink: #ffffff;
+  --focus: #0b6e78;
+  --ok-fg: #0b6b37; --ok-bg: #e0f2e7;
+  --warn-fg: #7d5200; --warn-bg: #faefd6;
+  --bad-fg: #9b2c25; --bad-bg: #fbe4e1;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #1baf7a; --c4: #eda100;
+  --c5: #e87ba4; --c6: #008300; --c7: #4a3aa7; --c8: #e34948;
+  --seq: #2a78d6;
+  --grid: #e1e6e7;
+  --font-display: "Unbounded", "IBM Plex Sans", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0d1518; --surface: #131f24; --surface-2: #182a30; --surface-3: #1f343b;
+    --ink: #e4edef; --ink-2: #b8c6cb; --muted: #8b9ca3; --rule: #23353c; --rule-strong: #3b525a;
+    --accent: #5cc6cf; --accent-soft: #123239; --accent-ink: #062125; --focus: #5cc6cf;
+    --ok-fg: #7fd6a1; --ok-bg: #12301f; --warn-fg: #f0c46a; --warn-bg: #33270c; --bad-fg: #f19b92; --bad-bg: #3a1714;
+    --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500;
+    --c5: #d55181; --c6: #008300; --c7: #9085e9; --c8: #e66767;
+    --seq: #3987e5; --grid: #22343a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d1518; --surface: #131f24; --surface-2: #182a30; --surface-3: #1f343b;
+  --ink: #e4edef; --ink-2: #b8c6cb; --muted: #8b9ca3; --rule: #23353c; --rule-strong: #3b525a;
+  --accent: #5cc6cf; --accent-soft: #123239; --accent-ink: #062125; --focus: #5cc6cf;
+  --ok-fg: #7fd6a1; --ok-bg: #12301f; --warn-fg: #f0c46a; --warn-bg: #33270c; --bad-fg: #f19b92; --bad-bg: #3a1714;
+  --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500;
+  --c5: #d55181; --c6: #008300; --c7: #9085e9; --c8: #e66767;
+  --seq: #3987e5; --grid: #22343a;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; } body { min-height: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-underline-offset: 3px; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.muted { color: var(--muted); }
+
+/* Top bar */
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--rule); }
+.top-inner { max-width: 1440px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; }
+.brand { display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+.wordmark { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: -0.01em; white-space: nowrap; }
+.wordmark b { color: var(--accent); font-weight: 600; }
+.brand small { color: var(--muted); font-size: 12.5px; white-space: nowrap; }
+.tabs { display: flex; gap: 2px; margin-left: auto; }
+.tab { border: 0; background: none; padding: 7px 12px; border-radius: 8px; cursor: pointer; color: var(--ink-2); font-weight: 500; font-size: 14px; }
+.tab:hover { background: var(--surface-2); }
+.tab[aria-selected="true"] { background: var(--accent-soft); color: var(--ink); }
+.langs { display: flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.langs button { border: 0; background: none; padding: 5px 9px; font-size: 12.5px; font-weight: 500; cursor: pointer; color: var(--ink-2); }
+.langs button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+@media (max-width: 760px) { .brand small { display: none; } .tabs { margin-left: 0; order: 3; width: 100%; } }
+
+.wrap { max-width: 1440px; margin: 0 auto; padding-inline: 20px; padding-block: 18px 60px; }
+
+/* Search */
+.search { display: grid; gap: 12px; margin-bottom: 14px; }
+.search-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.qbox { position: relative; flex: 1 1 420px; min-width: 0; }
+.qbox svg { position: absolute; left: 13px; top: 50%; width: 18px; height: 18px; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+#q { width: 100%; font-size: 16px; padding: 12px 14px 12px 40px; border-radius: 12px; border: 1px solid var(--rule-strong); background: var(--surface); }
+#q::placeholder { color: var(--muted); }
+.stats { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; }
+.filters label { display: flex; flex-direction: column; gap: 2px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.filters select { font-size: 13.5px; text-transform: none; letter-spacing: 0; color: var(--ink); padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); max-width: 240px; }
+.reset { align-self: flex-end; border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 13.5px; padding: 6px 4px; }
+
+/* Browse layout */
+.browse { display: grid; gap: 18px; align-items: start; }
+.browse { grid-template-columns: minmax(0, 1fr); }
+.browse > * { min-width: 0; }
+@media (min-width: 1000px) { .browse { grid-template-columns: minmax(340px, 0.9fr) minmax(0, 1.6fr); } }
+.panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; min-width: 0; }
+.results-head { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 8px; font-size: 13px; color: var(--muted); }
+.results { list-style: none; margin: 0; padding: 0; }
+.res { border-top: 1px solid var(--rule); }
+.res button { display: grid; gap: 3px; width: 100%; text-align: left; padding: 11px 16px; border: 0; background: none; cursor: pointer; }
+.res button:hover { background: var(--surface-2); }
+.res[aria-current="true"] button { background: var(--accent-soft); }
+.res-title { font-weight: 500; line-height: 1.35; }
+.res-sub { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.more { display: block; width: 100%; padding: 12px; border: 0; border-top: 1px solid var(--rule); background: none; color: var(--accent); cursor: pointer; font-weight: 500; }
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 500; background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.badge.src { background: var(--accent-soft); color: var(--ink); white-space: normal; }
+.badge.warn { background: var(--warn-bg); color: var(--warn-fg); }
+.badge.ok { background: var(--ok-bg); color: var(--ok-fg); }
+.badge.bad { background: var(--bad-bg); color: var(--bad-fg); }
+
+/* Detail */
+.detail { padding: 18px 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; }
+.detail > *, .landing > * { min-width: 0; }
+.tablewrap { max-width: 100%; }
+.detail h2 { margin: 0; font-size: 1.3rem; line-height: 1.3; font-weight: 600; text-wrap: balance; }
+.alt-names { font-size: 12.5px; color: var(--muted); display: grid; gap: 1px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 9px; border: 1px solid var(--rule-strong); background: var(--surface); cursor: pointer; font-size: 13.5px; font-weight: 500; text-decoration: none; color: var(--ink); }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.primary:hover { filter: brightness(1.05); }
+.btn svg { width: 15px; height: 15px; }
+.prov { font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 14px; }
+.note { font-size: 13px; padding: 9px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn-fg); }
+.note.info { background: var(--surface-2); color: var(--ink-2); }
+.section-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }
+.picker { border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.picker-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; background: var(--surface-2); }
+.picker-head input { flex: 1 1 180px; min-width: 0; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--rule); background: var(--surface); font-size: 13.5px; }
+.linkbtn { border: 0; background: none; color: var(--accent); cursor: pointer; font-size: 13px; padding: 4px 2px; }
+.rows { max-height: 220px; overflow: auto; list-style: none; margin: 0; padding: 4px 0; }
+.rows li label { display: flex; gap: 8px; align-items: flex-start; padding: 4px 12px; cursor: pointer; font-size: 13.5px; }
+.rows li label:hover { background: var(--surface-2); }
+.rows input { margin-top: 3px; accent-color: var(--accent); }
+.swatch { width: 10px; height: 10px; border-radius: 3px; flex: none; margin-top: 5px; }
+.rowcode { color: var(--muted); font-family: var(--font-mono); font-size: 11.5px; margin-left: auto; padding-left: 8px; white-space: nowrap; }
+.chart-box { position: relative; }
+.chart-box svg { display: block; width: 100%; height: auto; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--ink-2); margin-top: 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+.tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); padding: 8px 10px; border-radius: 8px; font-size: 12.5px; line-height: 1.45; max-width: 320px; box-shadow: 0 6px 20px rgba(0,0,0,.2); font-variant-numeric: tabular-nums; }
+.tip b { font-weight: 600; }
+.tip .tr { display: flex; gap: 8px; align-items: center; }
+.tip .tr i { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+.tablewrap { overflow: auto; border: 1px solid var(--rule); border-radius: 12px; max-height: 460px; background: var(--surface); }
+table.data { border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; width: max-content; min-width: 100%; }
+table.data th, table.data td { padding: 6px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+table.data th:first-child, table.data td:first-child { text-align: left; position: sticky; left: 0; background: var(--surface); z-index: 1; max-width: 320px; white-space: normal; min-width: 180px; }
+table.data thead th { position: sticky; top: 0; background: var(--surface-2); font-weight: 600; font-size: 12px; color: var(--ink-2); z-index: 2; }
+table.data thead th:first-child { z-index: 3; background: var(--surface-2); }
+table.data.plain td, table.data.plain th { text-align: left; }
+.meta-list { display: grid; gap: 8px; margin: 0; }
+.meta-list div { display: grid; gap: 2px; }
+.meta-list dt { font-size: 12px; font-weight: 600; color: var(--muted); }
+.meta-list dd { margin: 0; font-size: 13.5px; color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+details.meta summary { cursor: pointer; font-weight: 600; font-size: 13.5px; padding: 4px 0; }
+.empty { padding: 28px 20px; color: var(--muted); text-align: center; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; background: none; padding: 5px 10px; font-size: 12.5px; cursor: pointer; color: var(--ink-2); }
+.seg button[aria-pressed="true"] { background: var(--surface-3); color: var(--ink); font-weight: 500; }
+.back { display: none; }
+.home { justify-self: start; }
+@media (min-width: 1000px) {
+  .detail-panel { position: sticky; top: calc(var(--top-h, 72px) + 10px); max-height: calc(100vh - var(--top-h, 72px) - 20px); overflow: auto; }
+}
+@media (max-width: 999px) {
+  .home { display: none !important; }
+  body.show-detail .results-panel { display: none; }
+  body:not(.show-detail) .detail-panel { display: none; }
+  body.show-detail .search { display: none; }
+  .back { display: inline-flex; justify-self: start; }
+}
+
+/* Ask */
+.askbtn { display: inline-flex; align-items: center; gap: 6px; padding: 11px 14px; border-radius: 12px; border: 1px solid var(--accent); background: var(--accent-soft); color: var(--ink); cursor: pointer; font-weight: 500; white-space: nowrap; }
+.askbtn:hover { background: var(--surface); }
+.ask { padding: 18px 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ask textarea { width: 100%; min-height: 78px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--surface); font-size: 15px; }
+.ask-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.answer { white-space: pre-wrap; line-height: 1.6; font-size: 15px; background: var(--surface-2); border-radius: 12px; padding: 14px 16px; }
+.answer button.cite { border: 0; background: var(--accent-soft); color: var(--ink); border-radius: 6px; padding: 0 5px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; }
+.ask-status { font-size: 13px; color: var(--muted); }
+.examples { display: flex; flex-wrap: wrap; gap: 6px; }
+.examples button { border: 1px solid var(--rule); background: var(--surface); border-radius: 999px; padding: 4px 10px; font-size: 12.5px; cursor: pointer; color: var(--ink-2); }
+
+/* Landing */
+.landing { padding: 18px 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.cards { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); }
+.card { text-align: left; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 12px 14px; cursor: pointer; display: grid; gap: 4px; align-content: start; }
+.card:hover { border-color: var(--accent); }
+.card strong { font-weight: 600; font-size: 14px; line-height: 1.3; }
+.card span { font-size: 12.5px; color: var(--muted); }
+.themes { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.theme { display: flex; justify-content: space-between; gap: 10px; border: 1px solid var(--rule); border-radius: 10px; padding: 9px 12px; background: var(--surface); cursor: pointer; text-align: left; }
+.theme:hover { border-color: var(--accent); }
+.theme span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 13px; }
+.recent { list-style: none; margin: 0; padding: 0; display: grid; }
+.recent li button { width: 100%; text-align: left; display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border: 0; border-top: 1px solid var(--rule); background: none; cursor: pointer; }
+.recent li button:hover .rt { color: var(--accent); }
+.recent .rd { color: var(--muted); font-size: 12.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+/* Sources & about */
+.page { max-width: 1100px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.page > * { min-width: 0; }
+.page h2 { margin: 0; font-size: 1.35rem; }
+.page p { margin: 0; max-width: 72ch; color: var(--ink-2); }
+.srcgrid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.srccard { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 14px 16px; display: grid; gap: 6px; align-content: start; }
+.srccard b { font-size: 26px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.srccard span { font-size: 13px; color: var(--muted); }
+.skeleton { height: 14px; border-radius: 6px; background: var(--surface-2); margin: 10px 16px; }
+@media (prefers-reduced-motion: no-preference) { .skeleton { animation: pulse 1.2s ease-in-out infinite; } @keyframes pulse { 50% { opacity: .5; } } }
+.cc td { vertical-align: top; }
+.cc .ccv { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.cc tr.on td { background: var(--accent-soft); }
+.cc-detail { border: 1px solid var(--rule); border-radius: 14px; background: var(--surface); padding: 16px 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.cc-detail > * { min-width: 0; }
+.cc-detail h3 { margin: 0; font-size: 1.1rem; }
+.srcgroup { display: grid; gap: 10px; }
+.srcgroup .subhead { margin: 8px 0 0; font-size: 13px; font-weight: 600; color: var(--muted); text-transform: none; }
+/* Nowcast */
+.ncpage { max-width: 1280px; }
+.ncnav { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid var(--rule); padding-bottom: 8px; }
+.ncnav button { border: 1px solid transparent; background: none; padding: 6px 12px; border-radius: 999px; cursor: pointer; font-size: 13.5px; font-weight: 500; color: var(--ink-2); }
+.ncnav button:hover { background: var(--surface-2); }
+.ncnav button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.ncbody { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; }
+.ncbody > * { min-width: 0; }
+.nchead h2 { margin: 0 0 4px; font-size: 1.35rem; }
+.nchead p { font-size: 13px; }
+.nchero { display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .nchero { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } }
+.nchl { background: var(--surface); border: 1px solid var(--rule); border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.nchl.rec { border: 2px solid var(--accent); background: var(--accent-soft); }
+.ncbig { font-family: var(--font-display); font-size: 56px; line-height: 1.05; font-weight: 600; letter-spacing: -0.02em; color: var(--accent); font-variant-numeric: tabular-nums; }
+.ncrange { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; }
+.nckpis { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); align-content: start; }
+.nckpi { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; display: grid; gap: 2px; }
+.nckpi b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.nckpi span { font-size: 12.5px; }
+.nccomp .card { cursor: default; }
+.card.on { border-color: var(--accent); background: var(--accent-soft); }
+.ncv { font-size: 22px !important; font-variant-numeric: tabular-nums; }
+.relbar { display: inline-block; width: 60px; height: 6px; border-radius: 3px; background: var(--surface-2); vertical-align: middle; overflow: hidden; }
+.relbar i { display: block; height: 100%; background: var(--c1); }
+table.data tr.on td { background: var(--accent-soft); }
+.ctl { display: flex; flex-direction: column; gap: 3px; font-size: 11.5px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.labgrid { display: grid; gap: 16px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 1000px) { .labgrid { grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.5fr); } }
+.labgrid > * { min-width: 0; }
+.labform { padding: 14px 16px; display: grid; gap: 14px; grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.fld { display: grid; grid-template-columns: minmax(0, 1fr); gap: 5px; font-size: 13px; font-weight: 600; color: var(--ink-2); min-width: 0; }
+.fld select, .fld input[type=text], .optrow select, .optrow input { font-size: 13.5px; font-weight: 400; padding: 6px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: 100%; }
+.optrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.optrow label { display: grid; gap: 3px; font-size: 12px; font-weight: 500; color: var(--muted); }
+.optrow label.chk { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.optrow input[type=number] { width: 110px; }
+.predlist { max-height: 300px; overflow: auto; border: 1px solid var(--rule); border-radius: 10px; padding: 6px 10px; display: grid; gap: 8px; }
+.predblock { display: grid; gap: 2px; }
+.predblock b { font-size: 11.5px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.predblock label, .topics label, .fld > label { font-weight: 400; font-size: 13px; display: flex; gap: 6px; align-items: baseline; color: var(--ink); }
+.predblock input, .topics input { accent-color: var(--accent); }
+.topics { display: grid; gap: 3px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.labout { display: grid; gap: 14px; min-width: 0; }
+.labres { padding: 14px 16px; display: grid; gap: 12px; }
+.labai { padding: 14px 16px; display: grid; gap: 10px; }
+.labai textarea { width: 100%; min-height: 70px; resize: vertical; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--rule-strong); background: var(--surface); font-size: 14px; }
+.addser { display: grid; gap: 8px; margin-top: 6px; }
+.addser input { padding: 7px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); }
+.addres { list-style: none; margin: 0; padding: 0; max-height: 220px; overflow: auto; }
+.addres button { width: 100%; text-align: left; border: 0; border-top: 1px solid var(--rule); background: none; padding: 6px 4px; cursor: pointer; font-size: 13px; }
+.addres button:hover { background: var(--surface-2); }
+.repframe { width: 100%; min-height: 760px; border: 1px solid var(--rule); border-radius: 12px; background: #fff; }
+.analysis { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+.analysis > .wide { grid-column: 1 / -1; }
+.analysis > div { background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; }
+.analysis b { font-size: 14px; }
+.analysis p { margin: 4px 0 0; font-size: 13.5px; color: var(--ink-2); }
+.calcbtn { border: 1px solid var(--rule); background: var(--surface); color: var(--accent); border-radius: 999px; padding: 2px 9px; font-size: 12px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+.calcbtn:hover { border-color: var(--accent); background: var(--accent-soft); }
+.nchl .calcbtn { white-space: normal; max-width: 100%; text-align: left; }
+.calcbar { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; }
+.calcbar label { display: grid; gap: 3px; font-size: 12px; font-weight: 500; color: var(--muted); min-width: 0; max-width: 100%; }
+.calcbar select { font-size: 13.5px; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); color: var(--ink); max-width: min(420px, calc(100vw - 64px)); }
+.mpick { margin: 0 0 6px; }
+.mpick > summary { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--accent); padding: 4px 11px; border: 1px solid var(--rule); border-radius: 999px; background: var(--surface); list-style: none; }
+.mpick > summary::-webkit-details-marker { display: none; }
+.mpick > summary::before { content: "▸"; font-size: 11px; }
+.mpick[open] > summary::before { content: "▾"; }
+.mpick[open] > summary { background: var(--accent-soft); }
+.mpick-panel { margin-top: 6px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); display: grid; gap: 8px 16px; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); max-height: 340px; overflow: auto; }
+.mpick-panel > p { grid-column: 1 / -1; margin: 0; font-size: 12px; }
+.mpick-panel b { display: block; font-size: 11.5px; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.mpick-panel label { display: flex; gap: 6px; align-items: baseline; font-size: 13px; padding: 2px 0; }
+.mpick-panel input { accent-color: var(--accent); }
+.mpick-row { grid-column: 1 / -1; display: flex; gap: 14px; }
+.calc-eq { font-family: var(--font-mono); font-size: 13px; line-height: 1.6; background: var(--surface-2); border-radius: 10px; padding: 10px 12px; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+#calc-out { display: grid; gap: 18px; min-width: 0; }
+#calc-out > *, .calc-sec > *, .calc-blk { min-width: 0; }
+.calc-sec { display: grid; gap: 10px; }
+.calc-sec > h3 { margin: 6px 0 0; font-size: 1.05rem; }
+.calc-sec ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; font-size: 13.5px; color: var(--ink-2); }
+.calc-blk { border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); padding: 8px 12px; }
+.calc-blk > summary { cursor: pointer; font-weight: 600; font-size: 13.5px; padding: 4px 0; }
+.calc-blk > summary span { font-weight: 400; color: var(--muted); font-size: 12.5px; }
+.calc-blk[open] > summary { margin-bottom: 6px; }
+.calc-blk .note { margin: 0 0 8px; }
+table.data tr.total td { font-weight: 600; border-top: 2px solid var(--rule-strong); }
+.ncmore { margin: 6px 0 0; }
+.ncmore > summary { cursor: pointer; font-size: 13px; font-weight: 500; color: var(--accent); padding: 2px 0; }
+.ncmore[open] > summary { margin-bottom: 6px; }
+.calc-list { display: grid; gap: 6px; grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr)); }
+.calc-item { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; text-align: left; border: 1px solid var(--rule); border-radius: 10px; background: var(--surface); padding: 8px 10px; cursor: pointer; color: var(--ink); font-size: 13px; min-width: 0; }
+.calc-item:hover { border-color: var(--accent); }
+.calc-item b { font-weight: 500; overflow-wrap: anywhere; }
+.calc-item span { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.verdict { background: var(--surface); border: 1px solid var(--rule); border-left: 4px solid var(--accent); border-radius: 12px; padding: 10px 14px; font-size: 14px; display: grid; gap: 4px; }
+.verdict p { margin: 0; }
+.tabs { overflow-x: auto; scrollbar-width: none; }
+.tab { white-space: nowrap; flex: none; }
+.toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--surface); padding: 9px 14px; border-radius: 10px; font-size: 13.5px; z-index: 60; max-width: min(92vw, 560px); }
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="wordmark">IMRS <b>Data Hub</b></span><small id="tagline">Official statistics of Uzbekistan in one place</small></div>
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" role="tab" id="tab-browse" aria-selected="true" data-view="browse">Browse</button>
+      <button class="tab" role="tab" id="tab-nowcast" aria-selected="false" data-view="nowcast">Nowcast</button>
+      <button class="tab" role="tab" id="tab-compare" aria-selected="false" data-view="compare">Cross-check</button>
+      <button class="tab" role="tab" id="tab-sources" aria-selected="false" data-view="sources">Sources &amp; updates</button>
+      <button class="tab" role="tab" id="tab-about" aria-selected="false" data-view="about">About</button>
+    </nav>
+    <div class="langs" role="group" aria-label="Language">
+      <button data-lang="en" aria-pressed="true">EN</button>
+      <button data-lang="ru" aria-pressed="false">RU</button>
+      <button data-lang="uz" aria-pressed="false">UZ</button>
+      <button data-lang="uzc" aria-pressed="false">ЎЗ</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="view-browse">
+    <div class="search">
+      <div class="search-row">
+        <div class="qbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5" stroke-linecap="round"/></svg>
+          <input id="q" type="search" autocomplete="off" spellcheck="false" aria-label="Search datasets">
+        </div>
+        <button class="askbtn" id="askbtn" hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l1.8 4.9L19 9.7l-4.3 3.1L16 18l-4-2.8L8 18l1.3-5.2L5 9.7l5.2-1.8z" stroke-linejoin="round"/></svg><span id="askbtn-l">Ask the data</span></button>
+        <div class="stats" id="stats">Loading the catalogue…</div>
+      </div>
+      <div class="filters" id="filters"></div>
+    </div>
+    <div class="browse">
+      <div class="panel results-panel">
+        <div class="results-head"><span id="rcount"></span><span id="rsort"></span></div>
+        <ul class="results" id="results"><li><div class="skeleton"></div><div class="skeleton" style="width:70%"></div><div class="skeleton" style="width:80%"></div></li></ul>
+        <button class="more" id="more" hidden>Show more</button>
+      </div>
+      <div class="panel detail-panel" id="detail"></div>
+    </div>
+  </section>
+  <section id="view-nowcast" class="page ncpage" hidden></section>
+  <section id="view-compare" class="page" hidden></section>
+  <section id="view-sources" class="page" hidden></section>
+  <section id="view-about" class="page" hidden></section>
+</main>
+<div class="tip" id="tip" hidden></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function () {
+"use strict";
+var LANGS = ["en", "ru", "uz", "uzc"];
+var T = {
+  tagline: ["Official public data of Uzbekistan in one place", "Официальные открытые данные Узбекистана в одном месте", "O'zbekistonning rasmiy ochiq ma'lumotlari bir joyda", "Ўзбекистоннинг расмий очиқ маълумотлари бир жойда"],
+  nowcast: ["Nowcast", "Наукастинг", "Naukasting", "Наукастинг"],
+  compare: ["Cross-check", "Сверка источников", "Manbalarni solishtirish", "Манбаларни солиштириш"],
+  cc_title: ["The same indicator from different sources", "Один показатель — разные источники", "Bitta ko'rsatkich — turli manbalar", "Битта кўрсаткич — турли манбалар"],
+  cc_intro: ["Key indicators as published by national agencies and by international organisations. The gap is measured against the first national source in the latest period that two or more sources cover. International figures are estimates compiled by the organisation, and definitions can differ (for example mid-year versus start-of-year population), so a gap is a prompt to check the methodology, not proof of an error.", "Ключевые показатели в публикациях национальных ведомств и международных организаций. Расхождение считается относительно первого национального источника за последний период, по которому есть данные хотя бы двух источников. Международные данные — оценки организаций, а определения могут различаться (например, население на середину или на начало года), поэтому расхождение — повод проверить методологию, а не доказательство ошибки.", "Asosiy ko'rsatkichlar milliy idoralar va xalqaro tashkilotlar nashrlarida. Farq kamida ikki manba ma'lumoti bor so'nggi davr uchun birinchi milliy manbaga nisbatan hisoblanadi. Xalqaro ko'rsatkichlar tashkilotlarning baholaridir, ta'riflar farq qilishi mumkin (masalan, aholi yil o'rtasiga yoki boshiga), shuning uchun farq xato isboti emas, balki metodologiyani tekshirish uchun sababdir.", "Асосий кўрсаткичлар миллий идоралар ва халқаро ташкилотлар нашрларида. Фарқ камида икки манба маълумоти бор сўнгги давр учун биринчи миллий манбага нисбатан ҳисобланади. Халқаро кўрсаткичлар ташкилотларнинг баҳоларидир, таърифлар фарқ қилиши мумкин (масалан, аҳоли йил ўртасига ёки бошига), шунинг учун фарқ хато исботи эмас, балки методологияни текшириш учун сабабдир."],
+  cc_summary: ["{n} indicators: {a} agree, {d} differ beyond the tolerance.", "{n} показателей: {a} совпадают, {d} расходятся сверх допуска.", "{n} ta ko'rsatkich: {a} tasi mos, {d} tasi ruxsat etilgan farqdan oshadi.", "{n} та кўрсаткич: {a} таси мос, {d} таси рухсат этилган фарқдан ошади."],
+  cc_indicator: ["Indicator", "Показатель", "Ko'rsatkich", "Кўрсаткич"],
+  cc_latest: ["Compared period", "Период сравнения", "Solishtirilgan davr", "Солиштирилган давр"],
+  cc_values: ["Values by source", "Значения по источникам", "Manbalar bo'yicha qiymatlar", "Манбалар бўйича қийматлар"],
+  cc_gap: ["Largest gap", "Наибольшее расхождение", "Eng katta farq", "Энг катта фарқ"],
+  cc_agree: ["Agree", "Совпадают", "Mos", "Мос"],
+  cc_differs: ["Differ by {g}", "Расхождение {g}", "Farq {g}", "Фарқ {g}"],
+  cc_single: ["One source", "Один источник", "Bitta manba", "Битта манба"],
+  cc_tol: ["Tolerance {g}", "Допуск {g}", "Ruxsat etilgan farq {g}", "Рухсат этилган фарқ {g}"],
+  cc_open: ["Open dataset", "Открыть набор", "To'plamni ochish", "Тўпламни очиш"],
+  cc_ref: ["reference", "база сравнения", "taqqoslash asosi", "таққослаш асоси"],
+  also_src: ["This indicator is also published by other sources.", "Этот показатель публикуют и другие источники.", "Bu ko'rsatkichni boshqa manbalar ham e'lon qiladi.", "Бу кўрсаткични бошқа манбалар ҳам эълон қилади."],
+  also_btn: ["Compare sources", "Сравнить источники", "Manbalarni solishtirish", "Манбаларни солиштириш"],
+  intl: ["International estimate", "Международная оценка", "Xalqaro baho", "Халқаро баҳо"],
+  g_national: ["Uzbek state bodies", "Государственные органы Узбекистана", "O'zbekiston davlat organlari", "Ўзбекистон давлат органлари"],
+  g_gov: ["Ministries, agencies and khokimiyats (gov.uz)", "Министерства, агентства и хокимияты (gov.uz)", "Vazirliklar, agentliklar va hokimliklar (gov.uz)", "Вазирликлар, агентликлар ва ҳокимликлар (gov.uz)"],
+  g_gov_note: ["Statistics tables that these bodies publish on their gov.uz pages. Bodies that publish nothing machine-readable there are not listed.", "Статистические таблицы, которые эти органы публикуют на своих страницах gov.uz. Органы, не публикующие там машиночитаемых данных, не показаны.", "Ushbu organlar gov.uz sahifalarida e'lon qiladigan statistik jadvallar. U yerda mashina o'qiy oladigan ma'lumot e'lon qilmaydigan organlar ko'rsatilmagan.", "Ушбу органлар gov.uz саҳифаларида эълон қиладиган статистик жадваллар. У ерда машина ўқий оладиган маълумот эълон қилмайдиган органлар кўрсатилмаган."],
+  g_egov: ["Open data portal data.egov.uz", "Портал открытых данных data.egov.uz", "Ochiq ma'lumotlar portali data.egov.uz", "Очиқ маълумотлар портали data.egov.uz"],
+  g_egov_note: ["Datasets these bodies publish on the national open-data portal data.egov.uz. The portal opens only from Uzbekistan, so the Hub loads a copy made from a computer in Uzbekistan (snapshot of {d}). Registers with more than 5,000 rows are listed with links to the full files. Where a Statistics Agency dataset there copies a table the Hub already has, that Hub table shows it as “also published at data.egov.uz” instead of a second copy.", "Наборы данных, которые эти органы публикуют на национальном портале открытых данных data.egov.uz. Портал открывается только из Узбекистана, поэтому Хаб загружает копию, сделанную с компьютера в Узбекистане (снимок от {d}). Реестры более чем из 5000 строк показаны со ссылками на полные файлы. Если набор Агентства статистики там повторяет таблицу, которая уже есть в Хабе, эта таблица Хаба отмечена как «также опубликовано на data.egov.uz» вместо второй копии.", "Ushbu organlar data.egov.uz milliy ochiq ma'lumotlar portalida e'lon qiladigan to'plamlar. Portal faqat O'zbekistondan ochiladi, shuning uchun Hub O'zbekistondagi kompyuterdan olingan nusxani yuklaydi ({d} holatiga). 5 000 dan ortiq qatorli reyestrlar to'liq fayllarga havolalar bilan ko'rsatilgan. Statistika agentligining u yerdagi to'plami Hubda allaqachon mavjud jadvalni takrorlasa, Hub jadvali ikkinchi nusxa o'rniga «data.egov.uz saytida ham e'lon qilingan» deb belgilanadi.", "Ушбу органлар data.egov.uz миллий очиқ маълумотлар порталида эълон қиладиган тўпламлар. Портал фақат Ўзбекистондан очилади, шунинг учун Ҳаб Ўзбекистондаги компьютердан олинган нусхани юклайди ({d} ҳолатига). 5 000 дан ортиқ қаторли реестрлар тўлиқ файлларга ҳаволалар билан кўрсатилган. Статистика агентлигининг у ердаги тўплами Ҳабда аллақачон мавжуд жадвални такрорласа, Ҳаб жадвали иккинчи нусха ўрнига «data.egov.uz сайтида ҳам эълон қилинган» деб белгиланади."],
+  also_pub: ["Also published at data.egov.uz", "Также опубликовано на data.egov.uz", "Shuningdek data.egov.uz saytida e'lon qilingan", "Шунингдек data.egov.uz сайтида эълон қилинган"],
+  also_more: ["{n} more", "ещё {n}", "yana {n}", "яна {n}"],
+  g_intl: ["International organisations (second sources)", "Международные организации (вторые источники)", "Xalqaro tashkilotlar (ikkinchi manbalar)", "Халқаро ташкилотлар (иккинчи манбалар)"],
+  connectors: ["Connectors", "Коннекторы", "Konnektorlar", "Коннекторлар"],
+  runs: ["Update runs", "Запуски обновления", "Yangilash ishga tushirishlari", "Янгилаш ишга туширишлари"],
+  col_conn: ["Connector", "Коннектор", "Konnektor", "Коннектор"],
+  col_pub: ["Publisher", "Издатель", "Nashr etuvchi", "Нашр этувчи"],
+  col_what: ["What it collects", "Что собирает", "Nimani yig'adi", "Нимани йиғади"],
+  col_how: ["Method", "Способ", "Usul", "Усул"],
+  col_last: ["Last run", "Последний запуск", "So'nggi ishga tushirish", "Сўнгги ишга тушириш"],
+  col_run: ["Run", "Запуск", "Ishga tushirish", "Ишга тушириш"],
+  col_started: ["Started (UTC)", "Начало (UTC)", "Boshlangan (UTC)", "Бошланган (UTC)"],
+  col_type: ["Type", "Тип", "Turi", "Тури"],
+  col_changed: ["Datasets changed", "Изменено наборов", "O'zgargan to'plamlar", "Ўзгарган тўпламлар"],
+  browse: ["Browse", "Каталог", "Katalog", "Каталог"],
+  sources: ["Sources & updates", "Источники и обновления", "Manbalar va yangilanishlar", "Манбалар ва янгиланишлар"],
+  about: ["About", "О платформе", "Platforma haqida", "Платформа ҳақида"],
+  search_ph: ["Search {n} datasets: GDP, inflation, exports, Samarkand…", "Поиск по {n} наборам: ВВП, инфляция, экспорт, Самарканд…", "{n} ta to'plamdan qidiring: YaIM, inflyatsiya, eksport, Samarqand…", "{n} та тўпламдан қидиринг: ЯИМ, инфляция, экспорт, Самарқанд…"],
+  stats: ["{d} datasets · {s} series · {o} values · updated {u}", "{d} наборов · {s} рядов · {o} значений · обновлено {u}", "{d} to'plam · {s} qator · {o} qiymat · yangilangan {u}", "{d} тўплам · {s} қатор · {o} қиймат · янгиланган {u}"],
+  f_source: ["Source", "Источник", "Manba", "Манба"],
+  f_theme: ["Theme", "Тема", "Mavzu", "Мавзу"],
+  f_freq: ["Frequency", "Периодичность", "Davriylik", "Даврийлик"],
+  f_geo: ["Breakdown", "Разбивка", "Kesim", "Кесим"],
+  f_kind: ["Type", "Тип", "Turi", "Тури"],
+  f_upd: ["Updated at source", "Обновлено источником", "Manbada yangilangan", "Манбада янгиланган"],
+  any: ["All", "Все", "Barchasi", "Барчаси"],
+  geo_r: ["Regions", "Регионы", "Hududlar", "Ҳудудлар"],
+  geo_d: ["Districts", "Районы", "Tumanlar", "Туманлар"],
+  geo_n: ["National only", "Только по стране", "Faqat respublika", "Фақат республика"],
+  kind_s: ["Time series", "Временные ряды", "Vaqt qatorlari", "Вақт қаторлари"],
+  kind_t: ["Tables and registries", "Таблицы и реестры", "Jadvallar va reyestrlar", "Жадваллар ва реестрлар"],
+  upd_30: ["Last 30 days", "За 30 дней", "Oxirgi 30 kun", "Охирги 30 кун"],
+  upd_90: ["Last 90 days", "За 90 дней", "Oxirgi 90 kun", "Охирги 90 кун"],
+  upd_365: ["Last 12 months", "За 12 месяцев", "Oxirgi 12 oy", "Охирги 12 ой"],
+  reset: ["Clear filters", "Сбросить", "Tozalash", "Тозалаш"],
+  n_datasets: ["{n} datasets", "{n} наборов", "{n} ta to'plam", "{n} та тўплам"],
+  sort_rel: ["Best match first", "Сначала лучшие совпадения", "Eng mos kelganlari", "Энг мос келганлари"],
+  sort_new: ["Recently updated first", "Сначала недавно обновлённые", "Yaqinda yangilanganlari", "Яқинда янгиланганлари"],
+  with_region: ["Tables with {r}", "Таблицы с разбивкой: {r}", "{r} bo'yicha jadvallar", "{r} бўйича жадваллар"],
+  more: ["Show more", "Показать ещё", "Yana ko'rsatish", "Яна кўрсатиш"],
+  series_n: ["{n} series", "{n} рядов", "{n} qator", "{n} қатор"],
+  values_n: ["{n} values", "{n} значений", "{n} qiymat", "{n} қиймат"],
+  rows_n: ["{n} rows", "{n} строк", "{n} satr", "{n} сатр"],
+  empty: ["No datasets match. Try fewer words, another spelling, or clear the filters.", "Ничего не найдено. Уберите слова, измените написание или сбросьте фильтры.", "Hech narsa topilmadi. So'zlarni kamaytiring yoki filtrlarni tozalang.", "Ҳеч нарса топилмади. Сўзларни камайтиринг ёки фильтрларни тозаланг."],
+  key_ind: ["Key indicators", "Ключевые показатели", "Asosiy ko'rsatkichlar", "Асосий кўрсаткичлар"],
+  by_theme: ["Browse by theme", "По темам", "Mavzular bo'yicha", "Мавзулар бўйича"],
+  recent: ["Latest releases at source", "Последние публикации источников", "Manbalarning so'nggi e'lonlari", "Манбаларнинг сўнгги эълонлари"],
+  back: ["Back to results", "К результатам", "Natijalarga qaytish", "Натижаларга қайтиш"],
+  overview: ["Overview: key indicators and themes", "Обзор: ключевые показатели и темы", "Umumiy ko'rinish: asosiy ko'rsatkichlar va mavzular", "Умумий кўриниш: асосий кўрсаткичлар ва мавзулар"],
+  err_any: ["Something went wrong: {m}. Reload the page if a button stops responding.", "Что-то пошло не так: {m}. Если кнопка перестала реагировать, перезагрузите страницу.", "Xatolik yuz berdi: {m}. Tugma ishlamay qolsa, sahifani qayta yuklang.", "Хатолик юз берди: {m}. Тугма ишламай қолса, саҳифани қайта юкланг."],
+  dl_xlsx: ["Download Excel", "Скачать Excel", "Excel yuklab olish", "Excel юклаб олиш"],
+  dl_csv: ["Download CSV", "Скачать CSV", "CSV yuklab olish", "CSV юклаб олиш"],
+  dl_off: ["Downloads are off in this view. Use Copy for Excel and paste into a sheet, or try Allow downloads.", "Скачивание отключено в этом окне. Скопируйте данные или разрешите скачивание.", "Bu oynada yuklab olish o‘chirilgan. Ma’lumotni nusxalang yoki yuklab olishga ruxsat bering.", "Бу ойнада юклаб олиш ўчирилган. Маълумотни нусхаланг ёки юклаб олишга рухсат беринг."],
+  dl_allow: ["Allow downloads", "Разрешить скачивание", "Yuklab olishga ruxsat berish", "Юклаб олишга рухсат бериш"],
+  dl_still_off: ["Downloads are still off. Open the page's Permissions menu, allow downloads, then reload.", "Скачивание всё ещё отключено. Откройте меню «Разрешения», разрешите скачивание и перезагрузите страницу.", "Yuklab olish hali o‘chiq. Ruxsatlar menyusida yuklab olishni yoqing va sahifani qayta yuklang.", "Юклаб олиш ҳали ўчиқ. Рухсатлар менюсида юклаб олишни ёқинг ва саҳифани қайта юкланг."],
+  copy_xl: ["Copy for Excel", "Копировать для Excel", "Excel uchun nusxalash", "Excel учун нусхалаш"],
+  copied_xl: ["Copied. Open Excel, click cell A1 and paste (Ctrl+V or ⌘V).", "Скопировано. Откройте Excel, выберите ячейку A1 и вставьте (Ctrl+V или ⌘V).", "Nusxalandi. Excelni oching, A1 katagini tanlang va joylang (Ctrl+V yoki ⌘V).", "Нусхаланди. Excelни очинг, A1 катагини танланг ва жойланг (Ctrl+V ёки ⌘V)."],
+  dl_unavail: ["This view of the page cannot save files (this happens inside the Claude desktop and mobile apps and in embedded previews). Open the link in a web browser signed in to claude.ai, or use Copy for Excel and paste into a sheet.", "В этом окне страница не может сохранять файлы (так бывает в приложениях Claude для компьютера и телефона и во встроенном просмотре). Откройте ссылку в браузере, войдя в claude.ai, или нажмите «Копировать для Excel» и вставьте в таблицу.", "Bu oynada sahifa fayl saqlay olmaydi (Claude kompyuter va telefon ilovalarida hamda ichki ko‘rinishda shunday bo‘ladi). Havolani claude.ai ga kirgan holda brauzerda oching yoki «Excel uchun nusxalash»ni bosib, jadvalga joylang.", "Бу ойнада саҳифа файл сақлай олмайди (Claude компьютер ва телефон иловаларида ҳамда ички кўринишда шундай бўлади). Ҳаволани claude.ai га кирган ҳолда браузерда очинг ёки «Excel учун нусхалаш»ни босиб, жадвалга жойланг."],
+  copy_csv: ["Copy data as CSV", "Копировать как CSV", "CSV sifatida nusxalash", "CSV сифатида нусхалаш"],
+  cite: ["Copy citation", "Копировать ссылку", "Iqtibosni nusxalash", "Иқтибосни нусхалаш"],
+  official: ["Official page", "Официальная страница", "Rasmiy sahifa", "Расмий саҳифа"],
+  srcfile: ["Source file", "Исходный файл", "Manba fayli", "Манба файли"],
+  upd_src: ["Updated at source {d}", "Обновлено источником {d}", "Manbada yangilangan {d}", "Манбада янгиланган {d}"],
+  collected: ["Collected {d}", "Собрано {d}", "Yig'ilgan {d}", "Йиғилган {d}"],
+  fingerprint: ["File SHA-256 {h}", "SHA-256 файла {h}", "Fayl SHA-256 {h}", "Файл SHA-256 {h}"],
+  unit: ["Unit", "Единица измерения", "O'lchov birligi", "Ўлчов бирлиги"],
+  pick: ["Series in this dataset", "Ряды в этом наборе", "To'plamdagi qatorlar", "Тўпламдаги қаторлар"],
+  pick_filter: ["Filter series", "Фильтр рядов", "Qatorlarni saralash", "Қаторларни саралаш"],
+  pick_first: ["First series", "Первый ряд", "Birinchi qator", "Биринчи қатор"],
+  pick_regions: ["All regions", "Все регионы", "Barcha hududlar", "Барча ҳудудлар"],
+  pick_clear: ["Clear", "Очистить", "Tozalash", "Тозалаш"],
+  chart_cap: ["The chart shows up to 8 series; the table and downloads include every series.", "На графике до 8 рядов; таблица и файлы содержат все ряды.", "Grafikda 8 tagacha qator; jadval va fayllarda barcha qatorlar bor.", "Графикда 8 тагача қатор; жадвал ва файлларда барча қаторлар бор."],
+  chart: ["Chart", "График", "Grafik", "График"],
+  mixed_units: ["The selected series use different units", "У выбранных рядов разные единицы измерения", "Tanlangan qatorlarning o'lchov birliklari har xil", "Танланган қаторларнинг ўлчов бирликлари ҳар хил"],
+  regions_bar: ["Regions, {p}", "Регионы, {p}", "Hududlar, {p}", "Ҳудудлар, {p}"],
+  table: ["Data", "Данные", "Ma'lumotlar", "Маълумотлар"],
+  latest: ["Latest 12 periods", "Последние 12 периодов", "So'nggi 12 davr", "Сўнгги 12 давр"],
+  allp: ["All periods", "Все периоды", "Barcha davrlar", "Барча даврлар"],
+  sel_rows: ["Selected series", "Выбранные ряды", "Tanlangan qatorlar", "Танланган қаторлар"],
+  all_rows: ["All series", "Все ряды", "Barcha qatorlar", "Барча қаторлар"],
+  meta: ["Methodology and metadata", "Методология и метаданные", "Metodologiya va metama'lumotlar", "Методология ва метамаълумотлар"],
+  filter_rows: ["Filter rows", "Фильтр строк", "Satrlarni saralash", "Сатрларни саралаш"],
+  loading: ["Loading…", "Загрузка…", "Yuklanmoqda…", "Юкланмоқда…"],
+  choose: ["Pick a dataset on the left, or start with one of these.", "Выберите набор слева или начните с одного из этих.", "Chapdan to'plamni tanlang yoki quyidagilardan boshlang.", "Чапдан тўпламни танланг ёки қуйидагилардан бошланг."],
+  copied: ["Copied", "Скопировано", "Nusxalandi", "Нусхаланди"],
+  saved: ["Saved", "Сохранено", "Saqlandi", "Сақланди"],
+  failed: ["Could not copy. Select the text and copy it manually.", "Не удалось скопировать. Выделите текст и скопируйте вручную.", "Nusxalab bo'lmadi. Matnni belgilab, qo'lda nusxalang.", "Нусхалаб бўлмади. Матнни белгилаб, қўлда нусхаланг."],
+  nodata: ["No values for the selected series.", "Нет значений для выбранных рядов.", "Tanlangan qatorlarda qiymat yo'q.", "Танланган қаторларда қиймат йўқ."],
+  next_src: ["Sources being added", "Подключаемые источники", "Qo'shilayotgan manbalar", "Қўшилаётган манбалар"],
+  next_src_note: ["Sources marked done are collected. The update agent adds the remaining ones over time; blocked sources refuse connections from outside Uzbekistan or need a key.", "Источники со статусом done уже собираются. Остальные агент обновления подключает постепенно; blocked — сайты, которые не принимают подключения из-за пределов Узбекистана или требуют ключ.", "done holatidagi manbalar yig'ilmoqda. Qolganlarini yangilash agenti asta-sekin qo'shadi; blocked — O'zbekistondan tashqaridan ulanishni qabul qilmaydigan yoki kalit talab qiladigan saytlar.", "done ҳолатидаги манбалар йиғилмоқда. Қолганларини янгилаш агенти аста-секин қўшади; blocked — Ўзбекистондан ташқаридан уланишни қабул қилмайдиган ёки калит талаб қиладиган сайтлар."],
+  ask: ["Ask the data", "Спросить данные", "Ma'lumotlardan so'rash", "Маълумотлардан сўраш"],
+  ask_title: ["Ask a question about the data", "Задайте вопрос о данных", "Ma'lumotlar haqida savol bering", "Маълумотлар ҳақида савол беринг"],
+  ask_ph: ["For example: How has unemployment in Samarkand region changed since 2020?", "Например: как менялась безработица в Самаркандской области с 2020 года?", "Masalan: 2020-yildan beri Samarqand viloyatida ishsizlik qanday o'zgardi?", "Масалан: 2020 йилдан бери Самарқанд вилоятида ишсизлик қандай ўзгарди?"],
+  ask_btn: ["Ask", "Спросить", "So'rash", "Сўраш"],
+  stop: ["Stop", "Стоп", "To'xtatish", "Тўхтатиш"],
+  thinking: ["Thinking…", "Думаю…", "O'ylanmoqda…", "Ўйланмоқда…"],
+  searching: ["Searching the catalogue for “{q}”…", "Ищу в каталоге: «{q}»…", "Katalogdan qidirilmoqda: «{q}»…", "Каталогдан қидирилмоқда: «{q}»…"],
+  reading: ["Reading {n}…", "Читаю: {n}…", "O'qilmoqda: {n}…", "Ўқилмоқда: {n}…"],
+  ask_note: ["Claude writes the answer from the hub's data, using your Claude account. Open the linked datasets to check the figures.", "Ответ пишет Claude по данным платформы, используя ваш аккаунт Claude. Проверяйте цифры по ссылкам на наборы данных.", "Javobni Claude platforma ma'lumotlari asosida, sizning Claude hisobingiz orqali yozadi. Raqamlarni havola qilingan to'plamlarda tekshiring.", "Жавобни Claude платформа маълумотлари асосида, сизнинг Claude ҳисобингиз орқали ёзади. Рақамларни ҳавола қилинган тўпламларда текширинг."],
+  ask_err: ["The answer could not be completed ({c}). Try again or rephrase the question.", "Не удалось получить ответ ({c}). Попробуйте ещё раз или переформулируйте вопрос.", "Javob olinmadi ({c}). Qayta urinib ko'ring yoki savolni boshqacha bering.", "Жавоб олинмади ({c}). Қайта уриниб кўринг ёки саволни бошқача беринг."],
+  ask_off: ["Asking Claude is not available in this view.", "Вопросы к Claude недоступны в этом режиме.", "Bu ko'rinishda Claude'ga savol berib bo'lmaydi.", "Бу кўринишда Claude'га савол бериб бўлмайди."],
+  ask_denied: ["Claude was not allowed to answer on this page. Reload the page and choose Allow when Claude asks to use your account.", "Claude не получил разрешения отвечать на этой странице. Перезагрузите страницу и нажмите «Разрешить», когда Claude попросит доступ к вашему аккаунту.", "Claude'ga bu sahifada javob berishga ruxsat berilmadi. Sahifani qayta yuklang va Claude hisobingizdan foydalanishni so'raganda «Ruxsat berish»ni tanlang.", "Claude'га бу саҳифада жавоб беришга рухсат берилмади. Саҳифани қайта юкланг ва Claude ҳисобингиздан фойдаланишни сўраганда «Рухсат бериш»ни танланг."],
+  ask_limit: ["Claude is busy or your usage limit is reached. Wait a little and ask again.", "Claude занят или достигнут лимит использования. Подождите немного и спросите снова.", "Claude band yoki foydalanish limiti tugadi. Biroz kutib, qayta so'rang.", "Claude банд ёки фойдаланиш лимити тугади. Бироз кутиб, қайта сўранг."],
+  ask_signin: ["Your Claude session has expired. Sign in again and reload the page.", "Сессия Claude истекла. Войдите снова и перезагрузите страницу.", "Claude seansi tugadi. Qayta kiring va sahifani yangilang.", "Claude сеанси тугади. Қайта киринг ва саҳифани янгиланг."],
+  ask_steps: ["Steps: {s}", "Шаги: {s}", "Qadamlar: {s}", "Қадамлар: {s}"],
+  period: ["Period", "Период", "Davr", "Давр"],
+  series: ["Series", "Ряд", "Qator", "Қатор"]
+};
+var FREQ = { A: ["Annual", "Годовые", "Yillik", "Йиллик"], S: ["Half-yearly", "Полугодовые", "Yarim yillik", "Ярим йиллик"], Q: ["Quarterly", "Квартальные", "Choraklik", "Чораклик"], M: ["Monthly", "Месячные", "Oylik", "Ойлик"], W: ["Weekly", "Еженедельные", "Haftalik", "Ҳафталик"], D: ["Daily", "Ежедневные", "Kunlik", "Кунлик"], C: ["Cumulative since January", "Нарастающим итогом", "Yil boshidan", "Йил бошидан"] };
+var MONTHS = {
+  en: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  ru: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"],
+  uz: ["yan","fev","mar","apr","may","iyun","iyul","avg","sen","okt","noy","dek"],
+  uzc: ["янв","фев","мар","апр","май","июн","июл","авг","сен","окт","ноя","дек"]
+};
+var FEATURED = ["siat-1920", "siat-1921", "siat-4689", "cbu-fx-daily", "cbu-policy-rate", "siat-246", "siat-1875", "siat-577", "nsdp-bop", "nsdp-met", "ob-consolidated-budget", "ob-debt-overview", "cbu-st-bankstats-loans-and-deposits-banking-system-regions", "uzse-indices", "uzrvb-fx", "proc-xarid-by-region"];
+var FEAT = {}; FEATURED.forEach(function (id) { FEAT[id] = 1; });
+var SYN = [
+  ["gdp", "yaim", "ввп", "яим", "yalpi ichki mahsulot", "валовой внутренний продукт", "ялпи ички махсулот", "gross domestic product"],
+  ["inflation", "cpi", "инфляция", "inflyatsiya", "consumer price", "потребительских цен", "iste'mol narxlari", "истеъмол нархлари"],
+  ["unemployment", "безработица", "ishsizlik", "ишсизлик"],
+  ["population", "население", "aholi", "аҳоли"],
+  ["exports", "export", "экспорт", "eksport"],
+  ["imports", "import", "импорт"],
+  ["wage", "wages", "salary", "заработная плата", "зарплата", "ish haqi", "иш ҳақи"],
+  ["exchange rate", "курс", "kurs", "valyuta"],
+  ["policy rate", "основная ставка", "ключевая ставка", "asosiy stavka", "refinancing", "рефинансирования"],
+  ["remittances", "денежные переводы", "pul o'tkazmalari"],
+  ["poverty", "бедность", "kambag'allik", "камбағаллик"],
+  ["industry", "industrial", "промышленн", "sanoat", "саноат"],
+  ["agriculture", "сельское хозяйство", "сельскохозяйствен", "qishloq xo'jaligi", "қишлоқ хўжалиги"],
+  ["investment", "инвестиц", "investitsiya", "инвестиция"],
+  ["retail", "розничн", "chakana", "чакана"],
+  ["debt", "долг", "qarz", "қарз"],
+  ["reserves", "резерв", "zaxira", "захира"],
+  ["budget", "бюджет", "byudjet", "budjet"],
+  ["procurement", "госзакуп", "закупк", "xarid", "davlat xaridlari"],
+  ["stock exchange", "фондов", "birja", "биржа", "shares", "акци"],
+  ["commodity", "товарн", "tovar", "товар"],
+  ["sdg", "цур", "устойчивого развития", "barqaror rivojlanish", "барқарор ривожланиш"],
+  ["gender", "гендер", "women", "женщин", "ayollar", "аёллар"],
+  ["customs", "таможн", "bojxona", "божхона"],
+  ["privatization", "privatisation", "приватизац", "xususiylashtirish", "хусусийлаштириш"],
+  ["state-owned", "state enterprises", "государственн", "davlat ishtirokidagi", "давлат иштирокидаги"],
+  ["tax", "налог", "soliq", "солиқ"],
+  ["world bank", "всемирный банк", "jahon banki"],
+  ["region", "регион", "области", "viloyat", "вилоят"]
+];
+var REGIONS = [
+  ["1703", ["andijan", "andijon", "андижан", "андижон"]],
+  ["1706", ["bukhara", "buxoro", "бухара", "бухоро"]],
+  ["1708", ["jizzakh", "jizzax", "джизак", "жиззах"]],
+  ["1710", ["kashkadarya", "qashqadaryo", "кашкадарья", "қашқадарё"]],
+  ["1712", ["navoi", "navoiy", "навои", "навоий"]],
+  ["1714", ["namangan", "наманган"]],
+  ["1718", ["samarkand", "samarqand", "самарканд", "самарқанд"]],
+  ["1722", ["surkhandarya", "surxondaryo", "сурхандарья", "сурхондарё"]],
+  ["1724", ["syrdarya", "sirdaryo", "сырдарья", "сирдарё"]],
+  ["1726", ["tashkent", "toshkent", "ташкент", "тошкент"]],
+  ["1730", ["fergana", "fargona", "farg'ona", "фергана", "фарғона"]],
+  ["1733", ["khorezm", "xorazm", "хорезм", "хоразм"]],
+  ["1735", ["karakalpakstan", "qoraqalpogiston", "qoraqalpog'iston", "каракалпакстан", "қорақалпоғистон"]]
+];
+
+var state = { lang: "en", q: "", f: { s: "", t: "", fr: "", g: "", k: "", u: "" }, shown: 50, sel: null, view: "browse", results: [] };
+var CAT = null, IDX = [], BYID = {}, SHARDS = {}, STATUS = null, DL = null;
+try { var sl = localStorage.getItem("uzdh-lang"); if (sl && LANGS.indexOf(sl) >= 0) state.lang = sl; } catch (e) {}
+
+function L() { return LANGS.indexOf(state.lang); }
+function t(key, vars) { var a = T[key]; var s = a ? (a[L()] || a[0]) : key; if (vars) for (var k in vars) s = s.split("{" + k + "}").join(vars[k]); return s; }
+var FALLBACK = { en: [0, 1, 2, 3], ru: [1, 0, 2, 3], uz: [2, 3, 1, 0], uzc: [3, 2, 1, 0] };
+function pick(arr) { if (!arr) return ""; var o = FALLBACK[state.lang] || FALLBACK.en; for (var i = 0; i < o.length; i++) { if (arr[o[i]]) return arr[o[i]]; } return ""; }
+var STATUS_T = {
+  "Updated on schedule": ["Updated on schedule", "Обновлено в срок", "O'z vaqtida yangilangan", "Ўз вақтида янгиланган"],
+  "Updated after the due date": ["Updated after the due date", "Обновлено с опозданием", "Muddatidan keyin yangilangan", "Муддатидан кейин янгиланган"],
+  "Overdue": ["Update overdue", "Обновление просрочено", "Yangilash muddati o'tgan", "Янгилаш муддати ўтган"],
+  "Awaiting update": ["Awaiting update", "Ожидает обновления", "Yangilanish kutilmoqda", "Янгиланиш кутилмоқда"],
+  "No longer updated": ["No longer updated", "Больше не обновляется", "Endi yangilanmaydi", "Энди янгиланмайди"],
+  "Removed from SIAT catalogue": ["Removed from the SIAT catalogue", "Удалено из каталога SIAT", "SIAT katalogidan olib tashlangan", "SIAT каталогидан олиб ташланган"]
+};
+function statusName(st) { return STATUS_T[st] ? pick(STATUS_T[st]) : st; }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+function $(id) { return document.getElementById(id); }
+var LOCALE = { en: "en-US", ru: "ru-RU", uz: "uz-Latn-UZ", uzc: "uz-Cyrl-UZ" };
+function nf(v, maxFrac) {
+  if (v == null || isNaN(v)) return "–";
+  var a = Math.abs(v), d = maxFrac != null ? maxFrac : (a >= 1000 ? 1 : a >= 100 ? 2 : a >= 1 ? 2 : 4);
+  try { return new Intl.NumberFormat(LOCALE[state.lang] || "en-US", { maximumFractionDigits: d }).format(v); } catch (e) { return String(v); }
+}
+function big(n) { try { return new Intl.NumberFormat(LOCALE[state.lang] || "en-US", { notation: n >= 1e6 ? "compact" : "standard", maximumFractionDigits: 1 }).format(n); } catch (e) { return String(n); } }
+function fmtDate(iso) {
+  if (!iso) return "–";
+  var d = iso.slice(0, 10).split("-"); if (d.length < 3) return iso;
+  return (+d[2]) + " " + MONTHS[state.lang][(+d[1]) - 1] + " " + d[0];
+}
+function fmtPeriod(p) {
+  if (!p) return "";
+  var y = p.slice(0, 4), r = p.slice(5), mo = MONTHS[state.lang];
+  if (!r) return p;
+  if (p.charAt(4) === "/") return p;
+  if (r.charAt(0) === "Q") return state.lang === "en" ? r + " " + y : state.lang === "ru" ? r.slice(1) + " кв. " + y : y + " " + r.slice(1) + "-chorak";
+  if (r.charAt(0) === "C") { var m = +r.slice(1); return mo[0] + "–" + mo[m - 1] + " " + y; }
+  if (r.charAt(0) === "S") return (state.lang === "en" ? "H" : "") + r.slice(1) + (state.lang === "en" ? " " : " пол. ") + y;
+  var parts = r.split("-");
+  if (parts.length === 1 && /^\d\d$/.test(parts[0])) return mo[+parts[0] - 1] + " " + y;
+  if (parts.length === 2) return (+parts[1]) + " " + mo[+parts[0] - 1] + " " + y;
+  return p;
+}
+var CYR = { "а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"yo","ж":"j","з":"z","и":"i","й":"y","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"x","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya","ў":"o","қ":"q","ғ":"g","ҳ":"h","і":"i","ә":"a","ө":"o","ү":"u","ң":"n" };
+function norm(s) {
+  s = String(s || "").toLowerCase().replace(/[‘’ʻʼ`'´]/g, "");
+  var out = "";
+  for (var i = 0; i < s.length; i++) { var c = s.charAt(i); out += CYR.hasOwnProperty(c) ? CYR[c] : c; }
+  return out.replace(/[^a-z0-9.\-]+/g, " ").trim();
+}
+var SYN_N = SYN.map(function (g) { return g.map(norm); });
+var REG_N = REGIONS.map(function (r) { return [r[0], r[1].map(norm)]; });
+var REG_NAMES = { "1703": ["Andijan", "Андижанская область", "Andijon viloyati", "Андижон вилояти"], "1706": ["Bukhara", "Бухарская область", "Buxoro viloyati", "Бухоро вилояти"], "1708": ["Jizzakh", "Джизакская область", "Jizzax viloyati", "Жиззах вилояти"], "1710": ["Kashkadarya", "Кашкадарьинская область", "Qashqadaryo viloyati", "Қашқадарё вилояти"], "1712": ["Navoi", "Навоийская область", "Navoiy viloyati", "Навоий вилояти"], "1714": ["Namangan", "Наманганская область", "Namangan viloyati", "Наманган вилояти"], "1718": ["Samarkand", "Самаркандская область", "Samarqand viloyati", "Самарқанд вилояти"], "1722": ["Surkhandarya", "Сурхандарьинская область", "Surxondaryo viloyati", "Сурхондарё вилояти"], "1724": ["Syrdarya", "Сырдарьинская область", "Sirdaryo viloyati", "Сирдарё вилояти"], "1726": ["Tashkent city", "г. Ташкент", "Toshkent shahri", "Тошкент шаҳри"], "1730": ["Fergana", "Ферганская область", "Farg'ona viloyati", "Фарғона вилояти"], "1733": ["Khorezm", "Хорезмская область", "Xorazm viloyati", "Хоразм вилояти"], "1735": ["Karakalpakstan", "Республика Каракалпакстан", "Qoraqalpog'iston Respublikasi", "Қорақалпоғистон Республикаси"] };
+function regionOf(tok) {
+  if (tok.length < 4) return null;
+  for (var i = 0; i < REG_N.length; i++) { var vs = REG_N[i][1]; for (var j = 0; j < vs.length; j++) { if (vs[j].lastIndexOf(tok, 0) === 0) return REG_N[i][0]; } }
+  return null;
+}
+
+function srcShort(id) {
+  var m = SRC_SHORT[id];
+  if (m) return pick(m);
+  var s = CAT && CAT.sources[id]; return s ? pick(s.n) : id;
+}
+var SRC_SHORT = {
+  stat: ["Statistics Agency", "Агентство статистики", "Statistika agentligi", "Статистика агентлиги"],
+  cbu: ["Central Bank", "Центральный банк", "Markaziy bank", "Марказий банк"],
+  mof: ["Ministry of Economy and Finance", "Минэкономфин", "Iqtisodiyot va moliya vazirligi", "Иқтисодиёт ва молия вазирлиги"],
+  uzse: ["Tashkent Stock Exchange", "Фондовая биржа «Тошкент»", "«Toshkent» fond birjasi", "«Тошкент» фонд биржаси"],
+  customs: ["Customs Committee", "Таможенный комитет", "Bojxona qo'mitasi", "Божхона қўмитаси"],
+  miit: ["Ministry of Investment, Industry and Trade", "Мининвестпромторг", "Investitsiyalar, sanoat va savdo vazirligi", "Инвестициялар, саноат ва савдо вазирлиги"],
+  davaktiv: ["State Assets Management Agency", "Агентство по управлению госактивами", "Davlat aktivlarini boshqarish agentligi", "Давлат активларини бошқариш агентлиги"],
+  govuz: ["Ministries and khokimiyats (gov.uz)", "Министерства и хокимияты (gov.uz)", "Vazirlik va hokimliklar (gov.uz)", "Вазирлик ва ҳокимликлар (gov.uz)"],
+  uzrvb: ["Currency Exchange (UZRVB)", "Валютная биржа (УзРВБ)", "Valyuta birjasi (UZRVB)", "Валюта биржаси (УзРВБ)"],
+  uzex: ["Commodity Exchange (UzEx)", "Товарно-сырьевая биржа (УзРТСБ)", "Tovar-xom ashyo birjasi (UzEx)", "Товар-хом ашё биржаси (UzEx)"],
+  uzhydromet: ["Uzhydromet", "Узгидромет", "O'zgidromet", "Ўзгидромет"],
+  worldbank: ["World Bank", "Всемирный банк", "Jahon banki", "Жаҳон банки"],
+  imf: ["IMF", "МВФ", "XVJ", "ХВЖ"],
+  adb: ["Asian Development Bank", "Азиатский банк развития", "Osiyo taraqqiyot banki", "Осиё тараққиёт банки"],
+  ilo: ["ILO", "МОТ", "XMT", "ХМТ"],
+  unsd: ["UN Statistics Division", "Статистический отдел ООН", "BMT Statistika bo'limi", "БМТ Статистика бўлими"]
+};
+function isIntl(sid) { var s = CAT && CAT.sources[sid]; return !!(s && s.g === "international"); }
+function isGov(sid) { var s = CAT && CAT.sources[sid]; return !!(s && s.g === "govuz"); }
+function isEgov(sid) { var s = CAT && CAT.sources[sid]; return !!(s && s.g === "egov"); }
+function srcOrder() { return Object.keys(CAT.sources).sort(function (a, b) { return (CAT.sources[a].o || 99) - (CAT.sources[b].o || 99); }); }
+function srcFull(id) { var s = CAT && CAT.sources[id]; return s ? pick(s.n) : id; }
+function themeName(id) { var th = CAT && CAT.themes[id]; return th ? pick(th) : id; }
+function freqName(f) { if (!f) return ""; return f.split("/").map(function (x) { return FREQ[x] ? pick(FREQ[x]) : x; }).join(" · "); }
+function dsName(d) { return pick(d.n) || d.id; }
+
+/* ---------- catalogue & search ---------- */
+function buildIndex() {
+  IDX = CAT.datasets.map(function (d) {
+    var names = d.n.map(norm);
+    var extra = norm([d.code, (d.kw || []).join(" "), srcShort(d.s)].join(" "));
+    var th = CAT.themes[d.t] ? norm(CAT.themes[d.t].join(" ")) : "";
+    return { d: d, names: names, words: (names.join(" ") + " " + extra + " " + th).split(" ") };
+  });
+  CAT.datasets.forEach(function (d) { BYID[d.id] = d; });
+}
+function variants(q) {
+  var nq = " " + norm(q) + " ", vs = [nq];
+  SYN_N.forEach(function (g) {
+    g.forEach(function (term) {
+      if (term && nq.indexOf(" " + term) >= 0) {
+        g.forEach(function (alt) { if (alt !== term) vs.push(nq.replace(" " + term, " " + alt)); });
+      }
+    });
+  });
+  return vs.slice(0, 40).map(function (v) { return v.trim().split(" ").filter(function (x) { return x.length > 1 || /\d/.test(x); }); }).filter(function (v) { return v.length; });
+}
+function scoreEntry(e, toks) {
+  var s = 0, li = L();
+  for (var i = 0; i < toks.length; i++) {
+    var tk = toks[i], hit = false, w = e.words;
+    for (var j = 0; j < w.length; j++) { if (w[j].lastIndexOf(tk, 0) === 0) { hit = true; break; } }
+    if (!hit) return 0;
+    var nm = " " + e.names[li] + " ";
+    s += nm.indexOf(" " + tk) >= 0 ? 3 : (e.names.join(" ").indexOf(tk) >= 0 ? 2 : 1);
+  }
+  return s;
+}
+function matchesFilters(d) {
+  var f = state.f;
+  if (state.region && !(d.r >= 1)) return false;
+  if (f.s && d.s !== f.s) return false;
+  if (f.t && d.t !== f.t) return false;
+  if (f.fr && (!d.f || d.f.split("/").indexOf(f.fr) < 0)) return false;
+  if (f.g === "n" && d.r) return false;
+  if (f.g === "r" && !(d.r >= 1)) return false;
+  if (f.g === "d" && d.r !== 2) return false;
+  if (f.k && d.k !== f.k) return false;
+  if (f.u) { if (!d.up) return false; var days = (Date.now() - Date.parse(d.up)) / 864e5; if (days > +f.u) return false; }
+  return true;
+}
+function search() {
+  var q = state.q.trim(), out = [];
+  state.region = null;
+  if (q) {
+    var kept = norm(q).split(" ").filter(function (tk) { var r = regionOf(tk); if (r) { state.region = r; return false; } return true; });
+    if (state.region) q = kept.join(" ");
+  }
+  if (!q) {
+    out = CAT.datasets.filter(matchesFilters).slice();
+    out.sort(function (a, b) { return (b.up || "").localeCompare(a.up || ""); });
+    state.sortMode = "new";
+  } else {
+    var vs = variants(q);
+    IDX.forEach(function (e) {
+      if (!matchesFilters(e.d)) return;
+      var best = 0;
+      for (var i = 0; i < vs.length; i++) { var sc = scoreEntry(e, vs[i]); if (sc > best) best = sc; }
+      if (best > 0) out.push({ d: e.d, s: best + (e.d.r ? 0 : 0.3) + (e.d.lp && e.d.lp >= "2025" ? 0.4 : 0) + (isIntl(e.d.s) ? 0 : 0.5) + (FEAT[e.d.id] ? 0.5 : 0) });
+    });
+    out.sort(function (a, b) { return b.s - a.s || (b.d.lp || "").localeCompare(a.d.lp || ""); });
+    out = out.map(function (x) { return x.d; });
+    state.sortMode = "rel";
+  }
+  state.results = out;
+}
+
+/* ---------- rendering: shell ---------- */
+function applyLang() {
+  document.documentElement.lang = state.lang === "uzc" ? "uz-Cyrl" : state.lang;
+  $("tagline").textContent = t("tagline");
+  $("tab-browse").textContent = t("browse"); $("tab-nowcast").textContent = t("nowcast"); $("tab-compare").textContent = t("compare"); $("tab-sources").textContent = t("sources"); $("tab-about").textContent = t("about");
+  Array.prototype.forEach.call(document.querySelectorAll(".langs button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-lang") === state.lang ? "true" : "false"); });
+  $("more").textContent = t("more");
+  $("askbtn-l").textContent = t("ask");
+  if (CAT) {
+    $("q").placeholder = t("search_ph", { n: big(CAT.totals.datasets) });
+    $("stats").textContent = t("stats", { d: big(CAT.totals.datasets), s: big(CAT.totals.series), o: big(CAT.totals.obs), u: fmtDate(CAT.generated) });
+    renderFilters(); renderResults();
+    if (state.sel) renderDetail(state.sel); else if (state.askOpen) renderAsk(); else renderLanding();
+    if (state.view === "sources") renderSources();
+    if (state.view === "about") renderAbout();
+    if (state.view === "compare") renderCompare();
+  }
+  if (state.view === "nowcast" && window.NOWCAST) window.NOWCAST.rerender();
+}
+function opt(v, label, cur) { return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + ">" + esc(label) + "</option>"; }
+function renderFilters() {
+  var f = state.f, h = "";
+  var has = {}; CAT.datasets.forEach(function (d) { has[d.s] = 1; });
+  var srcs = srcOrder().filter(function (s) { return has[s]; });
+  var nat = srcs.filter(function (s) { return !isIntl(s) && !isGov(s) && !isEgov(s); }), gov = srcs.filter(isGov), egov = srcs.filter(isEgov), intl = srcs.filter(isIntl);
+  h += '<label>' + esc(t("f_source")) + '<select id="f-s">' + opt("", t("any"), f.s) +
+    '<optgroup label="' + esc(t("g_national")) + '">' + nat.map(function (s) { return opt(s, srcShort(s), f.s); }).join("") + "</optgroup>" +
+    (gov.length ? '<optgroup label="' + esc(t("g_gov")) + '">' + gov.map(function (s) { return opt(s, srcShort(s), f.s); }).join("") + "</optgroup>" : "") +
+    (egov.length ? '<optgroup label="' + esc(t("g_egov")) + '">' + egov.map(function (s) { return opt(s, srcShort(s), f.s); }).join("") + "</optgroup>" : "") +
+    (intl.length ? '<optgroup label="' + esc(t("g_intl")) + '">' + intl.map(function (s) { return opt(s, srcShort(s), f.s); }).join("") + "</optgroup>" : "") + "</select></label>";
+  var themes = Object.keys(CAT.themes).filter(function (k) { return CAT.datasets.some(function (d) { return d.t === k; }); });
+  h += '<label>' + esc(t("f_theme")) + '<select id="f-t">' + opt("", t("any"), f.t) + themes.map(function (k) { return opt(k, themeName(k), f.t); }).join("") + "</select></label>";
+  h += '<label>' + esc(t("f_freq")) + '<select id="f-fr">' + opt("", t("any"), f.fr) + ["A", "S", "Q", "M", "W", "D", "C"].filter(function (k) { return CAT.datasets.some(function (d) { return d.f && d.f.split("/").indexOf(k) >= 0; }); }).map(function (k) { return opt(k, pick(FREQ[k]), f.fr); }).join("") + "</select></label>";
+  h += '<label>' + esc(t("f_geo")) + '<select id="f-g">' + opt("", t("any"), f.g) + opt("r", t("geo_r"), f.g) + opt("d", t("geo_d"), f.g) + opt("n", t("geo_n"), f.g) + "</select></label>";
+  h += '<label>' + esc(t("f_kind")) + '<select id="f-k">' + opt("", t("any"), f.k) + opt("s", t("kind_s"), f.k) + opt("t", t("kind_t"), f.k) + "</select></label>";
+  h += '<label>' + esc(t("f_upd")) + '<select id="f-u">' + opt("", t("any"), f.u) + opt("30", t("upd_30"), f.u) + opt("90", t("upd_90"), f.u) + opt("365", t("upd_365"), f.u) + "</select></label>";
+  var active = Object.keys(f).some(function (k) { return f[k]; });
+  if (active) h += '<button class="reset" id="f-reset">' + esc(t("reset")) + "</button>";
+  $("filters").innerHTML = h;
+  ["s", "t", "fr", "g", "k", "u"].forEach(function (k) {
+    $("f-" + k).addEventListener("change", function (ev) { state.f[k] = ev.target.value; state.shown = 50; search(); renderFilters(); renderResults(); if (!state.sel) renderLanding(); });
+  });
+  if (active) $("f-reset").addEventListener("click", function () { state.f = { s: "", t: "", fr: "", g: "", k: "", u: "" }; state.shown = 50; search(); renderFilters(); renderResults(); if (!state.sel) renderLanding(); });
+}
+function resultItem(d) {
+  var sub = [srcShort(d.s), freqName(d.f)];
+  if (d.fp) sub.push(fmtPeriod(d.fp) + (d.lp && d.lp !== d.fp ? " – " + fmtPeriod(d.lp) : ""));
+  sub.push(d.k === "s" ? t("series_n", { n: big(d.ns || 0) }) : t("rows_n", { n: big(d.no || 0) }));
+  var badges = "";
+  if (d.r === 2) badges += ' <span class="badge">' + esc(t("geo_d")) + "</span>";
+  else if (d.r === 1) badges += ' <span class="badge">' + esc(t("geo_r")) + "</span>";
+  if (isIntl(d.s)) badges += ' <span class="badge">' + esc(t("intl")) + "</span>";
+  return '<li class="res" data-id="' + esc(d.id) + '"' + (state.sel === d.id ? ' aria-current="true"' : "") + '><button type="button"><span class="res-title">' + esc(dsName(d)) + badges +
+    '</span><span class="res-sub">' + sub.filter(Boolean).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") +
+    (d.up ? "<span>" + esc(t("upd_src", { d: fmtDate(d.up) })) + "</span>" : "") + "</span></button></li>";
+}
+function renderResults() {
+  var r = state.results, n = Math.min(state.shown, r.length);
+  $("rcount").textContent = t("n_datasets", { n: big(r.length) });
+  $("rsort").textContent = state.region ? t("with_region", { r: pick(REG_NAMES[state.region]) }) : (state.sortMode === "rel" ? t("sort_rel") : t("sort_new"));
+  $("results").innerHTML = r.length ? r.slice(0, n).map(resultItem).join("") : '<li class="empty">' + esc(t("empty")) + "</li>";
+  $("more").hidden = n >= r.length;
+}
+function renderLanding() {
+  var el = $("detail");
+  var feat = FEATURED.map(function (id) { return BYID[id]; }).filter(Boolean);
+  var counts = {};
+  CAT.datasets.forEach(function (d) { if (matchesFilters(d)) counts[d.t] = (counts[d.t] || 0) + 1; });
+  var recent = CAT.datasets.filter(function (d) { return d.up && matchesFilters(d); }).sort(function (a, b) { return b.up.localeCompare(a.up); }).slice(0, 12);
+  el.innerHTML = '<div class="landing"><p class="muted" style="margin:0">' + esc(t("choose")) + "</p>" +
+    '<div><h3 class="section-title">' + esc(t("key_ind")) + '</h3><div class="cards">' + feat.map(function (d) {
+      return '<button class="card" data-open="' + esc(d.id) + '"><strong>' + esc(dsName(d)) + "</strong><span>" + esc(srcShort(d.s) + " · " + freqName(d.f)) + "</span><span>" + esc(fmtPeriod(d.fp) + " – " + fmtPeriod(d.lp)) + "</span></button>";
+    }).join("") + "</div></div>" +
+    '<div><h3 class="section-title">' + esc(t("by_theme")) + '</h3><div class="themes">' + Object.keys(CAT.themes).filter(function (k) { return counts[k]; }).map(function (k) {
+      return '<button class="theme" data-theme="' + esc(k) + '"><span>' + esc(themeName(k)) + "</span><span>" + big(counts[k]) + "</span></button>";
+    }).join("") + "</div></div>" +
+    '<div><h3 class="section-title">' + esc(t("recent")) + '</h3><ul class="recent">' + recent.map(function (d) {
+      return '<li><button data-open="' + esc(d.id) + '"><span class="rt">' + esc(dsName(d)) + '</span><span class="rd">' + esc(fmtDate(d.up)) + "</span></button></li>";
+    }).join("") + "</ul></div></div>";
+}
+
+/* ---------- data files (gzip-compressed JSON) ---------- */
+function getJSON(path) {
+  return fetch(path).then(function (r) {
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    if (/\.gz\.txt$/.test(path)) return r.text().then(function (b64) {   // base64 of gzip
+      var bin = atob(b64.trim()), n = bin.length, u = new Uint8Array(n);
+      for (var i = 0; i < n; i++) u[i] = bin.charCodeAt(i);
+      return u.buffer;
+    });
+    return r.arrayBuffer();
+  }).then(function (buf) {
+    var b = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+    if (b[0] === 0x1f && b[1] === 0x8b) {
+      if (typeof DecompressionStream === "undefined") throw new Error("this browser cannot open compressed data; please update it");
+      return new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream("gzip"))).text();
+    }
+    return new TextDecoder("utf-8").decode(buf);
+  }).then(function (txt) { return JSON.parse(txt); });
+}
+
+/* ---------- dataset detail ---------- */
+function isNarrow() { return window.matchMedia ? window.matchMedia("(max-width: 999px)").matches : window.innerWidth < 1000; }
+function setTopHeight() { var tp = document.querySelector(".top"); if (tp) document.documentElement.style.setProperty("--top-h", tp.offsetHeight + "px"); }
+function detailToTop() {
+  var el = $("detail");
+  if (isNarrow()) { window.scrollTo(0, 0); return; }
+  el.scrollTop = 0;
+  var r = el.getBoundingClientRect(), topH = (document.querySelector(".top") || {}).offsetHeight || 0;
+  if (r.top < topH || r.top > window.innerHeight * 0.6) window.scrollTo(0, Math.max(0, window.scrollY + r.top - topH - 10));
+}
+function loadShard(name) {
+  if (SHARDS[name]) return SHARDS[name];
+  SHARDS[name] = getJSON("data/shards/" + name + ".gz.txt");
+  SHARDS[name].catch(function () { delete SHARDS[name]; });
+  return SHARDS[name];
+}
+var VIEW = { id: null, data: null, selected: [], tableMode: "latest", rowsMode: "sel" };
+function openDataset(id, push) {
+  var d = BYID[id]; if (!d) return;
+  if (isNarrow() && !document.body.classList.contains("show-detail")) state.listY = window.scrollY;
+  state.sel = id; state.askOpen = false; document.body.classList.add("show-detail");
+  Array.prototype.forEach.call(document.querySelectorAll(".res"), function (li) { li.setAttribute("aria-current", li.getAttribute("data-id") === id ? "true" : "false"); });
+  if (push !== false) { try { history.replaceState(null, "", "#d-" + id); } catch (e) { location.hash = "d-" + id; } }
+  renderDetail(id);
+  detailToTop();
+}
+function backBtns() { return '<button class="btn back" id="back">← ' + esc(t("back")) + '</button><button class="linkbtn home" id="home">← ' + esc(t("overview")) + "</button>"; }
+function bindBack() { $("back").onclick = closeDetail; $("home").onclick = closeDetail; }
+function renderDetail(id) {
+  var d = BYID[id], el = $("detail");
+  el.innerHTML = '<div class="detail">' + backBtns() + "<h2>" + esc(dsName(d)) + '</h2><div class="skeleton"></div><div class="skeleton" style="width:60%"></div><p class="muted">' + esc(t("loading")) + "</p></div>";
+  bindBack();
+  loadShard(d.sh).then(function (sh) {
+    if (state.sel !== id) return;
+    var data = sh[id];
+    if (VIEW.id !== id) {
+      VIEW = { id: id, data: data, selected: data.r ? defaultSelection(d, data) : [], tableMode: "latest", rowsMode: "sel", rowFilter: "" };
+    } else { VIEW.data = data; }
+    drawDetail(d, data);
+  }).catch(function (e) {
+    el.innerHTML = '<div class="detail"><h2>' + esc(dsName(d)) + '</h2><p class="note">Could not load the data file (' + esc(e.message) + '). Reload the page to try again.</p></div>';
+  });
+}
+function closeDetail() {
+  var wasNarrow = isNarrow() && document.body.classList.contains("show-detail");
+  state.sel = null; state.askOpen = false; document.body.classList.remove("show-detail");
+  try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+  renderLanding(); renderResults();
+  if (wasNarrow) window.scrollTo(0, state.listY || 0); else { $("detail").scrollTop = 0; }
+}
+function defaultSelection(d, data) {
+  var r = data.r, sel = [];
+  if (state.region) {
+    r.forEach(function (x, i) { var c = String(x.c || x.k); if (c === "1700" || c === state.region) sel.push(i); });
+    if (sel.length) return sel;
+  }
+  if (d.id === "cbu-fx-daily") { ["USD", "EUR"].forEach(function (k) { r.forEach(function (x, i) { if (x.k === k) sel.push(i); }); }); return sel.length ? sel : [0]; }
+  if (r.length <= 6) {
+    var u0 = unitOf(d, data, r[0]);
+    r.forEach(function (x, i) { if (unitOf(d, data, x) === u0) sel.push(i); });
+    return sel;
+  }
+  return [0];
+}
+function label(row) { return pick(row.l) || row.k; }
+function unitOf(d, data, row) { return (row && row.u) || pick(data.m.unit) || d.u || ""; }
+function drawDetail(d, data) {
+  var el = $("detail"), m = data.m, meta = m.meta || {};
+  var alt = d.n.map(function (x, i) { return i === L() || !x || x === pick(d.n) ? null : x; }).filter(Boolean);
+  var chips = ['<span class="badge src">' + esc(srcFull(d.s)) + "</span>", '<span class="badge">' + esc(themeName(d.t)) + "</span>"];
+  if (d.f) chips.push('<span class="badge">' + esc(freqName(d.f)) + "</span>");
+  if (d.fp) chips.push('<span class="badge">' + esc(fmtPeriod(d.fp) + " – " + fmtPeriod(d.lp)) + "</span>");
+  if (d.code) chips.push('<span class="badge mono">' + esc(d.code) + "</span>");
+  if (d.st) chips.push('<span class="badge ' + (/Overdue|No longer|Removed/.test(d.st) ? "warn" : "ok") + '">' + esc(statusName(d.st)) + "</span>");
+  if (isIntl(d.s)) chips.push('<span class="badge warn">' + esc(t("intl")) + "</span>");
+  var ccIdx = CC_BYDS[d.id] || [];
+  var ccNote = ccIdx.length ? '<p class="note info">' + esc(t("also_src")) + " " + ccIdx.slice(0, 4).map(function (i) { return '<button class="linkbtn" data-ccopen="' + i + '">' + esc(t("also_btn")) + ": " + esc(pick(CC.indicators[i].n)) + " →</button>"; }).join(" ") + "</p>" : "";
+  var prov = [];
+  if (m.src_upd) prov.push(t("upd_src", { d: fmtDate(m.src_upd) }));
+  if (m.fetched) prov.push(t("collected", { d: fmtDate(m.fetched) }));
+  if (m.sha) prov.push(t("fingerprint", { h: m.sha.slice(0, 12) + "…" }));
+  var unit = pick(m.unit) || d.u;
+  var note = meta.note ? '<p class="note' + (/incomplete|instead|mislabel/i.test(meta.note) ? "" : " info") + '">' + esc(meta.note) + "</p>" : "";
+  var dlBtns = (DL || NATIVE) ? '<button class="btn primary" id="dl-xlsx">' + icon("dl") + esc(t("dl_xlsx")) + '</button><button class="btn" id="dl-csv">' + esc(t("dl_csv")) + "</button>" : '<button class="btn primary" id="copy-xl">' + icon("copy") + esc(t("copy_xl")) + '</button><button class="btn" id="copy-csv">' + esc(t("copy_csv")) + "</button>" + (CAN_ASK ? '<button class="btn" id="allow-dl">' + icon("dl") + esc(t("dl_allow")) + "</button>" : "");
+  var h = '<div class="detail">' + backBtns() +
+    "<div><h2>" + esc(dsName(d)) + "</h2>" + (alt.length ? '<div class="alt-names">' + alt.slice(0, 3).map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</div>" : "") + "</div>" +
+    '<div class="chips">' + chips.join("") + "</div>" +
+    '<div class="actions">' + dlBtns + '<button class="btn" id="cite">' + icon("quote") + esc(t("cite")) + "</button>" +
+    (m.page ? '<a class="btn" href="' + esc(m.page) + '" target="_blank" rel="noopener">' + esc(t("official")) + " ↗</a>" : "") +
+    (m.data && /^https?:/.test(m.data) && m.data.indexOf("{") < 0 ? '<a class="btn" href="' + esc(m.data) + '" target="_blank" rel="noopener">' + esc(t("srcfile")) + " ↗</a>" : "") + "</div>" + (DL || NATIVE || !CAN_ASK ? "" : '<p class="note info" id="dl-off">' + esc(t("dl_off")) + "</p>") +
+    '<div class="prov">' + prov.map(function (x) { return "<span>" + esc(x) + "</span>"; }).join("") + "</div>" +
+    (unit ? '<div class="prov"><span><b>' + esc(t("unit")) + ":</b> " + esc(unit) + "</span></div>" : "") + note + ccNote + alsoNote(m);
+  if (data.r) {
+    h += '<div id="picker"></div><div><div class="toolbar"><h3 class="section-title">' + esc(t("chart")) + '</h3></div><div class="chart-box" id="chart"></div><div class="legend" id="legend"></div></div>';
+    if (d.r >= 1) h += '<div><h3 class="section-title" id="rbar-title"></h3><div class="chart-box" id="rbar"></div></div>';
+    h += '<div><div class="toolbar"><h3 class="section-title">' + esc(t("table")) + '</h3><div style="display:flex;gap:8px;flex-wrap:wrap"><span class="seg" id="seg-rows"><button data-v="sel">' + esc(t("sel_rows")) + '</button><button data-v="all">' + esc(t("all_rows")) + '</button></span><span class="seg" id="seg-per"><button data-v="latest">' + esc(t("latest")) + '</button><button data-v="all">' + esc(t("allp")) + '</button></span></div></div><div class="tablewrap" id="tbl"></div></div>';
+  } else {
+    h += '<div><div class="picker-head" style="border-radius:10px"><input id="tfilter" type="search" placeholder="' + esc(t("filter_rows")) + '"></div></div><div class="tablewrap" id="tbl"></div>';
+  }
+  h += metaBlock(d, data) + "</div>";
+  el.innerHTML = h;
+  bindBack();
+  $("cite").onclick = function () { copyText(citation(d, data)); };
+  if (DL || NATIVE) { $("dl-xlsx").onclick = function () { downloadXlsx(d, data); }; $("dl-csv").onclick = function () { saveFile(fileBase(d) + ".csv", "﻿" + toCSV(d, data)); }; }
+  else { $("copy-csv").onclick = function () { copyText(toCSV(d, data)); }; $("copy-xl").onclick = function () { copyText(toTSV(d, data), t("copied_xl")); }; if ($("allow-dl")) $("allow-dl").onclick = allowDownloads; }
+  if (data.r) { drawPicker(d, data); drawChart(d, data); drawRegions(d, data); drawTable(d, data); segs(d, data); }
+  else { drawPlainTable(data, ""); $("tfilter").addEventListener("input", function (e) { drawPlainTable(data, e.target.value); }); }
+}
+function alsoNote(m) {
+  if (!m.also || !m.also.length) return "";
+  function a(x) { return '<a href="' + esc(x.u) + '" target="_blank" rel="noopener">' + esc(x.n || x.u) + " ↗</a>" + (x.up ? ' <span class="muted">(' + esc(fmtDate(x.up)) + ")</span>" : ""); }
+  var first = m.also.slice(0, 3), rest = m.also.slice(3), more = (m.also_n || m.also.length) - first.length;
+  return '<div class="note info"><b>' + esc(t("also_pub")) + ":</b> " + first.map(a).join(" · ") +
+    (more > 0 ? ' <details style="display:inline"><summary class="linkbtn" style="display:inline;cursor:pointer">' + esc(t("also_more", { n: more })) + "</summary>" + rest.map(a).join(" · ") + "</details>" : "") + "</div>";
+}
+function metaBlock(d, data) {
+  var meta = (data.m && data.m.meta) || {}, items = [];
+  var md = meta.metadata || {};
+  Object.keys(md).forEach(function (k) {
+    if (/phone|email|responsible officer|communication/i.test(k)) return;
+    var v = md[k]; if (!v) return;
+    var val = pick([v.en, v.ru, v.uz, v.uzc]);
+    if (val && String(val).trim()) items.push([v.n ? pick(v.n) || k : k, val]);
+  });
+  if (meta.path) items.push(["Catalogue path", meta.path.join(" › ")]);
+  if (meta.standard) items.push(["Standard", meta.standard]);
+  if (meta.indicator_prefix) items.push(["Indicator family", meta.indicator_prefix]);
+  if (meta.api) items.push(["API", meta.api]);
+  if (meta.history_note) items.push(["History", meta.history_note]);
+  if (meta.also_published_in) items.push(["Also published at", meta.also_published_in.join("\n")]);
+  if (meta.prepared) items.push(["File prepared", meta.prepared]);
+  if (meta.timestamps) items.push(["Dates", meta.timestamps]);
+  if (meta.formats) items.push(["Other formats", Object.keys(meta.formats).map(function (k) { return k.toUpperCase() + ": " + meta.formats[k]; }).join("\n")]);
+  var SKIP = { metadata: 1, path: 1, standard: 1, indicator_prefix: 1, api: 1, history_note: 1, also_published_in: 1, prepared: 1, timestamps: 1, formats: 1, note: 1 };
+  Object.keys(meta).forEach(function (k) {
+    if (SKIP[k] || /phone|e-?mail|contact|person/i.test(k)) return;
+    var v = meta[k], txt = "";
+    if (v == null || v === "" || (Array.isArray(v) && !v.length)) return;
+    if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") txt = String(v);
+    else if (Array.isArray(v)) txt = v.slice(0, 40).map(function (x) { return typeof x === "object" ? JSON.stringify(x) : String(x); }).join("\n") + (v.length > 40 ? "\n…" : "");
+    else txt = Object.keys(v).slice(0, 40).map(function (kk) { var x = v[kk]; return kk + ": " + (typeof x === "object" ? JSON.stringify(x) : x); }).join("\n");
+    if (txt.length > 2000) txt = txt.slice(0, 2000) + "…";
+    items.push([k.replace(/_/g, " ").replace(/^./, function (c) { return c.toUpperCase(); }), txt]);
+  });
+  if (data.m.first_seen) items.push(["First collected", fmtDate(data.m.first_seen)]);
+  if (data.m.changed) items.push(["Last changed in the hub", fmtDate(data.m.changed)]);
+  if (!items.length) return "";
+  return '<details class="meta"><summary>' + esc(t("meta")) + '</summary><dl class="meta-list">' + items.map(function (x) { return "<div><dt>" + esc(x[0]) + "</dt><dd>" + esc(x[1]) + "</dd></div>"; }).join("") + "</dl></details>";
+}
+function segs(d, data) {
+  function upd() {
+    Array.prototype.forEach.call(document.querySelectorAll("#seg-rows button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-v") === VIEW.rowsMode ? "true" : "false"); });
+    Array.prototype.forEach.call(document.querySelectorAll("#seg-per button"), function (b) { b.setAttribute("aria-pressed", b.getAttribute("data-v") === VIEW.tableMode ? "true" : "false"); });
+  }
+  upd();
+  Array.prototype.forEach.call(document.querySelectorAll("#seg-rows button"), function (b) { b.onclick = function () { VIEW.rowsMode = b.getAttribute("data-v"); upd(); drawTable(d, data); }; });
+  Array.prototype.forEach.call(document.querySelectorAll("#seg-per button"), function (b) { b.onclick = function () { VIEW.tableMode = b.getAttribute("data-v"); upd(); drawTable(d, data); }; });
+}
+var COLORS = ["--c1", "--c2", "--c3", "--c4", "--c5", "--c6", "--c7", "--c8"];
+function colorFor(i) { var pos = VIEW.selected.indexOf(i); return pos >= 0 && pos < 8 ? "var(" + COLORS[pos] + ")" : "transparent"; }
+function isRegion(row) { var c = String(row.c || row.k); return /^17\d\d$/.test(c) && c !== "1700"; }
+function drawPicker(d, data) {
+  var rows = data.r; if (rows.length <= 1) { $("picker").innerHTML = ""; return; }
+  var f = norm(VIEW.rowFilter || "");
+  var h = '<div class="picker"><div class="picker-head"><strong style="font-size:13px">' + esc(t("pick")) + ' <span class="muted">(' + rows.length + ')</span></strong><input id="rfilter" type="search" value="' + esc(VIEW.rowFilter || "") + '" placeholder="' + esc(t("pick_filter")) + '"><button class="linkbtn" id="p-first">' + esc(t("pick_first")) + "</button>" +
+    (rows.some(isRegion) ? '<button class="linkbtn" id="p-reg">' + esc(t("pick_regions")) + "</button>" : "") + '<button class="linkbtn" id="p-clear">' + esc(t("pick_clear")) + '</button></div><ul class="rows">';
+  rows.forEach(function (r, i) {
+    var lb = label(r);
+    if (f && norm(lb + " " + (r.c || r.k)).indexOf(f) < 0) return;
+    var on = VIEW.selected.indexOf(i) >= 0;
+    h += '<li><label><input type="checkbox" data-i="' + i + '"' + (on ? " checked" : "") + '><span class="swatch" style="background:' + colorFor(i) + '"></span><span>' + esc(lb) + '</span><span class="rowcode">' + esc(r.c || r.k) + "</span></label></li>";
+  });
+  h += "</ul></div>";
+  $("picker").innerHTML = h;
+  var inp = $("rfilter");
+  inp.addEventListener("input", function (e) { VIEW.rowFilter = e.target.value; var pos = e.target.selectionStart; drawPicker(d, data); var n = $("rfilter"); n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} });
+  Array.prototype.forEach.call(document.querySelectorAll("#picker input[type=checkbox]"), function (cb) {
+    cb.addEventListener("change", function () {
+      var i = +cb.getAttribute("data-i"), k = VIEW.selected.indexOf(i);
+      if (cb.checked && k < 0) VIEW.selected.push(i); else if (!cb.checked && k >= 0) VIEW.selected.splice(k, 1);
+      refreshSeries(d, data);
+    });
+  });
+  $("p-first").onclick = function () { VIEW.selected = [0]; refreshSeries(d, data); };
+  $("p-clear").onclick = function () { VIEW.selected = []; refreshSeries(d, data); };
+  if ($("p-reg")) $("p-reg").onclick = function () { VIEW.selected = []; rows.forEach(function (r, i) { if (isRegion(r)) VIEW.selected.push(i); }); refreshSeries(d, data); };
+}
+function refreshSeries(d, data) { drawPicker(d, data); drawChart(d, data); drawTable(d, data); }
+
+/* ---------- charts ---------- */
+function niceTicks(min, max, n) {
+  if (min === max) { min -= 1; max += 1; }
+  var span = max - min, step = Math.pow(10, Math.floor(Math.log10(span / n))), err = n / span * step;
+  if (err <= 0.15) step *= 10; else if (err <= 0.35) step *= 5; else if (err <= 0.75) step *= 2;
+  var lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step, ticks = [];
+  for (var v = lo; v <= hi + step / 2; v += step) ticks.push(+v.toFixed(10));
+  return ticks;
+}
+function cssVar(n) { return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
+function drawChart(d, data) {
+  var box = $("chart"), leg = $("legend"); if (!box) return;
+  var sel = VIEW.selected.slice(0, 8);
+  var P = data.p;
+  var idx = [];
+  for (var i = 0; i < P.length; i++) { for (var j = 0; j < sel.length; j++) { if (data.r[sel[j]].v[i] != null) { idx.push(i); break; } } }
+  if (!sel.length || !idx.length) { box.innerHTML = '<p class="muted" style="margin:6px 0">' + esc(t("nodata")) + "</p>"; leg.innerHTML = ""; return; }
+  var W = Math.max(320, box.clientWidth || 720), H = Math.round(Math.min(360, Math.max(230, W * 0.42)));
+  var padL = 58, padR = sel.length <= 4 && W > 560 ? 120 : 16, padT = 12, padB = 30;
+  var vmin = Infinity, vmax = -Infinity;
+  sel.forEach(function (s) { idx.forEach(function (i) { var v = data.r[s].v[i]; if (v != null) { if (v < vmin) vmin = v; if (v > vmax) vmax = v; } }); });
+  var ticks = niceTicks(vmin, vmax, 5), y0 = ticks[0], y1 = ticks[ticks.length - 1];
+  var n = idx.length, pw = W - padL - padR, ph = H - padT - padB;
+  function X(k) { return padL + (n === 1 ? pw / 2 : k * pw / (n - 1)); }
+  function Y(v) { return padT + ph - (v - y0) / (y1 - y0) * ph; }
+  var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(dsName(d)) + '">';
+  ticks.forEach(function (tv) { var y = Y(tv); svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--grid)" stroke-width="1"/><text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + esc(nf(tv, Math.abs(y1 - y0) < 10 ? 2 : 0)) + "</text>"; });
+  var nt = Math.min(n, Math.max(2, Math.floor(pw / 90))), lastX = -1e9;
+  for (var q = 0; q < nt; q++) {
+    var k = Math.round(q * (n - 1) / Math.max(1, nt - 1)), x = X(k);
+    if (x - lastX < 70) continue; lastX = x;
+    svg += '<text x="' + x + '" y="' + (H - 9) + '" text-anchor="' + (q === 0 ? "start" : q === nt - 1 ? "end" : "middle") + '" font-size="11" fill="var(--muted)">' + esc(fmtPeriod(P[idx[k]])) + "</text>";
+  }
+  svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + (padT + ph) + '" y2="' + (padT + ph) + '" stroke="var(--rule-strong)" stroke-width="1"/>';
+  var ends = [];
+  sel.forEach(function (s, si) {
+    var pts = [], seg = "", row = data.r[s];
+    for (var k = 0; k < n; k++) { var v = row.v[idx[k]]; if (v == null) { if (pts.length) { seg += "M" + pts.join("L"); pts = []; } continue; } pts.push(X(k).toFixed(1) + "," + Y(v).toFixed(1)); }
+    if (pts.length) seg += "M" + pts.join("L");
+    var col = "var(" + COLORS[si] + ")";
+    svg += '<path d="' + seg + '" fill="none" stroke="' + col + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>';
+    for (var k2 = n - 1; k2 >= 0; k2--) { var v2 = row.v[idx[k2]]; if (v2 != null) { ends.push({ x: X(k2), y: Y(v2), c: col, l: label(row), v: v2 }); break; } }
+  });
+  ends.forEach(function (e) { svg += '<circle cx="' + e.x + '" cy="' + e.y + '" r="4" fill="' + e.c + '" stroke="var(--surface)" stroke-width="2"/>'; });
+  if (padR > 16) {
+    ends.sort(function (a, b) { return a.y - b.y; });
+    var lastY = -1e9;
+    ends.forEach(function (e) { var y = Math.max(e.y + 4, lastY + 14); lastY = y; svg += '<text x="' + (e.x + 8) + '" y="' + y + '" font-size="11.5" fill="var(--ink-2)">' + esc(trunc(e.l, 16)) + "</text>"; });
+  }
+  svg += '<line id="xh" x1="0" x2="0" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--rule-strong)" stroke-width="1" visibility="hidden"/>';
+  svg += '<rect x="' + padL + '" y="' + padT + '" width="' + pw + '" height="' + ph + '" fill="transparent" id="hit"/></svg>';
+  box.innerHTML = svg;
+  leg.innerHTML = sel.length > 1 ? sel.map(function (s, si) { return '<span><i style="background:var(' + COLORS[si] + ')"></i>' + esc(label(data.r[s])) + "</span>"; }).join("") : "";
+  if (VIEW.selected.length > 8) leg.innerHTML += '<span class="muted">' + esc(t("chart_cap")) + "</span>";
+  var units = {}; sel.forEach(function (s) { units[unitOf(d, data, data.r[s])] = 1; });
+  if (Object.keys(units).length > 1) leg.innerHTML += '<span class="badge warn">' + esc(t("mixed_units")) + "</span>";
+  var hit = box.querySelector("#hit"), xh = box.querySelector("#xh"), tip = $("tip");
+  hit.addEventListener("pointermove", function (ev) {
+    var r = box.querySelector("svg").getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+    var k = n === 1 ? 0 : Math.round((sx - padL) / pw * (n - 1)); k = Math.max(0, Math.min(n - 1, k));
+    var x = X(k); xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+    var hh = "<b>" + esc(fmtPeriod(P[idx[k]])) + "</b>";
+    sel.forEach(function (s, si) { var v = data.r[s].v[idx[k]]; hh += '<div class="tr"><i style="background:var(' + COLORS[si] + ')"></i><span>' + esc(trunc(label(data.r[s]), 34)) + ": <b>" + esc(nf(v)) + "</b></span></div>"; });
+    tip.innerHTML = hh; tip.hidden = false;
+    var tx = ev.clientX + 14, ty = ev.clientY + 14, tr = tip.getBoundingClientRect();
+    if (tx + tr.width > innerWidth - 8) tx = ev.clientX - tr.width - 14;
+    if (ty + tr.height > innerHeight - 8) ty = ev.clientY - tr.height - 14;
+    tip.style.left = tx + "px"; tip.style.top = ty + "px";
+  });
+  hit.addEventListener("pointerleave", function () { tip.hidden = true; xh.setAttribute("visibility", "hidden"); });
+}
+function trunc(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+function drawRegions(d, data) {
+  var box = $("rbar"); if (!box) return;
+  var regs = []; data.r.forEach(function (r, i) { if (isRegion(r)) regs.push(i); });
+  if (regs.length < 3) { box.parentNode.hidden = true; return; }
+  var pi = -1;
+  for (var i = data.p.length - 1; i >= 0; i--) { var cnt = 0; regs.forEach(function (s) { if (data.r[s].v[i] != null) cnt++; }); if (cnt >= Math.min(10, regs.length)) { pi = i; break; } }
+  if (pi < 0) { box.parentNode.hidden = true; return; }
+  $("rbar-title").textContent = t("regions_bar", { p: fmtPeriod(data.p[pi]) });
+  var items = regs.map(function (s) { return { l: label(data.r[s]), v: data.r[s].v[pi] }; }).filter(function (x) { return x.v != null; }).sort(function (a, b) { return b.v - a.v; });
+  var W = Math.max(320, box.clientWidth || 720), rowH = 22, padL = Math.min(190, W * 0.36), padR = 70, H = items.length * rowH + 8;
+  var vmin = Math.min(0, Math.min.apply(null, items.map(function (x) { return x.v; }))), vmax = Math.max.apply(null, items.map(function (x) { return x.v; }));
+  var pw = W - padL - padR; function X(v) { return padL + (v - vmin) / ((vmax - vmin) || 1) * pw; }
+  var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc($("rbar-title").textContent) + '">';
+  items.forEach(function (it, k) {
+    var y = 4 + k * rowH, x0 = X(Math.max(0, vmin)), x1 = X(it.v), w = Math.max(1, Math.abs(x1 - x0));
+    svg += '<text x="' + (padL - 8) + '" y="' + (y + 14) + '" text-anchor="end" font-size="12" fill="var(--ink-2)">' + esc(trunc(it.l, 26)) + "</text>";
+    svg += '<rect x="' + Math.min(x0, x1) + '" y="' + (y + 3) + '" width="' + w + '" height="14" rx="3" fill="var(--seq)"><title>' + esc(it.l + ": " + nf(it.v)) + "</title></rect>";
+    svg += '<text x="' + (Math.max(x0, x1) + 6) + '" y="' + (y + 14) + '" font-size="11.5" fill="var(--ink)">' + esc(nf(it.v)) + "</text>";
+  });
+  box.innerHTML = svg + "</svg>";
+}
+function drawTable(d, data) {
+  var el = $("tbl"); if (!el) return;
+  var rowsIdx = VIEW.rowsMode === "all" ? data.r.map(function (_, i) { return i; }) : (VIEW.selected.length ? VIEW.selected : [0]);
+  var P = data.p, cols = [];
+  for (var i = P.length - 1; i >= 0; i--) { if (rowsIdx.some(function (r) { return data.r[r].v[i] != null; })) cols.push(i); if (VIEW.tableMode === "latest" && cols.length >= 12) break; }
+  cols.reverse();
+  var maxRows = 400, shown = rowsIdx.slice(0, maxRows);
+  var h = '<table class="data"><thead><tr><th>' + esc(t("series")) + "</th>" + cols.map(function (i) { return "<th>" + esc(fmtPeriod(P[i])) + "</th>"; }).join("") + "</tr></thead><tbody>";
+  shown.forEach(function (r) { var row = data.r[r]; h += "<tr><td>" + esc(label(row)) + "</td>" + cols.map(function (i) { return "<td>" + esc(nf(row.v[i])) + "</td>"; }).join("") + "</tr>"; });
+  h += "</tbody></table>";
+  if (rowsIdx.length > maxRows) h += '<p class="muted" style="padding:6px 10px;margin:0">+' + (rowsIdx.length - maxRows) + "</p>";
+  el.innerHTML = h;
+  el.scrollLeft = el.scrollWidth;
+}
+function drawPlainTable(data, filter) {
+  var el = $("tbl"), f = norm(filter || "");
+  var rows = data.rows.filter(function (r) { return !f || norm(r.join(" ")).indexOf(f) >= 0; });
+  var h = '<table class="data plain"><thead><tr>' + data.cols.map(function (c) { return "<th>" + esc(c) + "</th>"; }).join("") + "</tr></thead><tbody>";
+  rows.slice(0, 1000).forEach(function (r) { h += "<tr>" + r.map(function (v) { return "<td>" + esc(typeof v === "number" ? nf(v) : v) + "</td>"; }).join("") + "</tr>"; });
+  el.innerHTML = h + "</tbody></table>";
+}
+
+/* ---------- export ---------- */
+function fileBase(d) { return (d.id + "_" + (pick(d.n) || "").slice(0, 60)).replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, "_"); }
+function csvCell(v) { if (v == null) return ""; var s = String(v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+function tsvCell(v) { return v == null ? "" : String(v).replace(/[\t\r\n]+/g, " "); }
+function toTSV(d, data) {
+  var lines = [];
+  if (data.r) {
+    lines.push(["code", "series", "unit"].concat(data.p.map(fmtPeriod)).map(tsvCell).join("\t"));
+    data.r.forEach(function (r) { lines.push([r.c || r.k, label(r), unitOf(d, data, r)].concat(r.v).map(tsvCell).join("\t")); });
+  } else {
+    lines.push(data.cols.map(tsvCell).join("\t"));
+    data.rows.forEach(function (r) { lines.push(r.map(tsvCell).join("\t")); });
+  }
+  return lines.join("\n");
+}
+function toCSV(d, data) {
+  var lines = [];
+  if (data.r) {
+    lines.push(["code", "series", "unit"].concat(data.p).map(csvCell).join(","));
+    data.r.forEach(function (r) { lines.push([r.c || r.k, label(r), unitOf(d, data, r)].concat(r.v).map(csvCell).join(",")); });
+  } else {
+    lines.push(data.cols.map(csvCell).join(","));
+    data.rows.forEach(function (r) { lines.push(r.map(csvCell).join(",")); });
+  }
+  return lines.join("\n");
+}
+function citation(d, data) {
+  var date = fmtDate((data.m && data.m.fetched) || CAT.generated);
+  var tmpl = [
+    "{pub}. {name}{code}. Retrieved {date} from {url} via IMRS Data Hub.",
+    "{pub}. {name}{code}. Дата обращения: {date}. {url} (через IMRS Data Hub).",
+    "{pub}. {name}{code}. Olingan sana: {date}. {url} (IMRS Data Hub orqali).",
+    "{pub}. {name}{code}. Олинган сана: {date}. {url} (IMRS Data Hub орқали)."
+  ][L()];
+  return tmpl.replace("{pub}", srcFull(d.s)).replace("{name}", dsName(d)).replace("{code}", d.code ? " [" + d.code + "]" : "").replace("{date}", date).replace("{url}", (data.m && data.m.page) || "");
+}
+function toast(msg, ms) { var el = $("toast"); el.textContent = msg; el.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { el.hidden = true; }, ms || Math.min(8000, 2200 + 40 * String(msg).length)); }
+function copyText(s, okMsg) {
+  try { navigator.clipboard.writeText(s).then(function () { toast(okMsg || t("copied")); }, function () { fallbackCopy(s); }); }
+  catch (e) { fallbackCopy(s); }
+}
+function fallbackCopy(s) {
+  var ta = document.createElement("textarea"); ta.value = s; ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+  var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+  document.body.removeChild(ta); toast(ok ? t("copied") : t("failed"));
+}
+function saveFile(name, data) {
+  if (!DL && NATIVE) { nativeSave(name, data); return; }
+  if (!DL) return;
+  DL.save({ filename: name, data: data }).then(function (r) { if (r && r.status === "saved") toast(t("saved")); }, function (e) { if (e && e.code !== "declined") toast((e && e.message) || "Download unavailable"); });
+}
+/* Outside claude.ai (for example on GitHub Pages) the browser saves files itself. */
+function nativeSave(name, data) {
+  var blob = data instanceof Blob ? data : new Blob([data], { type: /\.csv$/i.test(name) ? "text/csv;charset=utf-8" : "application/octet-stream" });
+  var url = URL.createObjectURL(blob), a = document.createElement("a");
+  a.href = url; a.download = name; a.style.display = "none"; document.body.appendChild(a); a.click();
+  setTimeout(function () { document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+}
+var XLSX_URL = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+function withXlsx(cb) {
+  if (window.XLSX) return cb();
+  var s = document.createElement("script"); s.src = XLSX_URL; s.onload = cb; s.onerror = function () { toast("Excel export unavailable; use CSV."); }; document.head.appendChild(s);
+}
+function downloadXlsx(d, data) {
+  withXlsx(function () {
+    var X = window.XLSX, wb = X.utils.book_new(), aoa = [];
+    if (data.r) {
+      aoa.push(["code", "series", "unit"].concat(data.p.map(fmtPeriod)));
+      data.r.forEach(function (r) { aoa.push([r.c || r.k, label(r), unitOf(d, data, r)].concat(r.v)); });
+    } else { aoa.push(data.cols); data.rows.forEach(function (r) { aoa.push(r); }); }
+    X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(aoa), "data");
+    var info = [["Dataset", dsName(d)], ["Code", d.code || ""], ["Publisher", srcFull(d.s)], ["Official page", data.m.page || ""], ["Source file", data.m.data || ""],
+      ["Updated at source", data.m.src_upd || ""], ["Collected", data.m.fetched || ""], ["SHA-256 of source file", data.m.sha || ""], ["Unit", pick(data.m.unit) || d.u || ""], ["Citation", citation(d, data)]];
+    X.utils.book_append_sheet(wb, X.utils.aoa_to_sheet(info), "source");
+    var out = X.write(wb, { bookType: "xlsx", type: "array" });
+    saveFile(fileBase(d) + ".xlsx", new Blob([out]));
+  });
+}
+function icon(n) {
+  if (n === "dl") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 19h14" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  if (n === "copy") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 00-1-1H5a1 1 0 00-1 1v10a1 1 0 001 1h3"/></svg>';
+  if (n === "quote") return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M7 7h4v4H7zM7 11c0 3-1 5-3 6M15 7h4v4h-4zM15 11c0 3-1 5-3 6" stroke-linecap="round"/></svg>';
+  return "";
+}
+
+/* ---------- sources & about ---------- */
+function renderSources() {
+  var el = $("view-sources");
+  var bySrc = {}; CAT.datasets.forEach(function (d) { var b = bySrc[d.s] = bySrc[d.s] || { n: 0, s: 0, o: 0 }; b.n++; b.s += d.ns || 0; b.o += d.no || 0; });
+  var h = "<h2>" + esc(t("sources")) + "</h2><p>" + esc([
+    "Every dataset is collected automatically from the official publisher and refreshed on the 1st and 15th of each month. Each run records what changed, including revisions to past values.",
+    "Каждый набор собирается автоматически у официального издателя и обновляется 1-го и 15-го числа каждого месяца. Каждый запуск фиксирует изменения, включая пересмотры прошлых значений.",
+    "Har bir to'plam rasmiy nashriyotchidan avtomatik yig'iladi va har oyning 1 va 15-sanasida yangilanadi. Har bir ishga tushirish o'zgarishlarni, jumladan o'tgan qiymatlarning qayta ko'rib chiqilishini qayd etadi.",
+    "Ҳар бир тўплам расмий нашриётчидан автоматик йиғилади ва ҳар ойнинг 1 ва 15-санасида янгиланади. Ҳар бир ишга тушириш ўзгаришларни, жумладан ўтган қийматларнинг қайта кўриб чиқилишини қайд этади."][L()]) + "</p>";
+  function card(s) { var b = bySrc[s]; return '<div class="srccard"><span>' + esc(srcFull(s)) + "</span><b>" + big(b.n) + "</b><span>" + esc(t("n_datasets", { n: "" }).trim()) + " · " + esc(t("series_n", { n: big(b.s) })) + " · " + esc(t("values_n", { n: big(b.o) })) + "</span>" + (CAT.sources[s] && CAT.sources[s].url ? '<a href="' + esc(CAT.sources[s].url) + '" target="_blank" rel="noopener">' + esc(CAT.sources[s].url.replace(/^https?:\/\//, "")) + " ↗</a>" : "") + "</div>"; }
+  var ordered = srcOrder().filter(function (s) { return bySrc[s]; });
+  var natS = ordered.filter(function (s) { return !isIntl(s) && !isGov(s) && !isEgov(s); }), govS = ordered.filter(isGov), egovS = ordered.filter(isEgov), intlS = ordered.filter(isIntl);
+  function bodyGroups(list, title, note) {
+    var byType = [], seenT = {};
+    list.forEach(function (s) { var tp = CAT.sources[s].tp || ""; if (!seenT[tp]) { seenT[tp] = { names: CAT.sources[s].tn, list: [] }; byType.push(seenT[tp]); } seenT[tp].list.push(s); });
+    return '<div class="srcgroup"><h3 class="section-title">' + esc(title) + " · " + big(list.length) + '</h3><p class="muted">' + esc(note) + "</p>" +
+      byType.map(function (g) { return (g.names ? '<h4 class="subhead">' + esc(pick(g.names)) + " · " + big(g.list.length) + "</h4>" : "") + '<div class="srcgrid">' + g.list.map(card).join("") + "</div>"; }).join("") + "</div>";
+  }
+  h += '<div class="srcgroup"><h3 class="section-title">' + esc(t("g_national")) + '</h3><div class="srcgrid">' + natS.map(card).join("") + "</div></div>";
+  if (govS.length) h += bodyGroups(govS, t("g_gov"), t("g_gov_note"));
+  if (egovS.length) h += bodyGroups(egovS, t("g_egov"), t("g_egov_note", { d: CAT.egov_snapshot ? fmtDate(CAT.egov_snapshot) : "–" }));
+  if (intlS.length) h += '<div class="srcgroup"><h3 class="section-title">' + esc(t("g_intl")) + '</h3><div class="srcgrid">' + intlS.map(card).join("") + "</div></div>";
+  if (STATUS) {
+    h += '<div><h3 class="section-title">' + esc(t("connectors")) + '</h3><div class="tablewrap"><table class="data plain"><thead><tr><th>' + esc(t("col_conn")) + "</th><th>" + esc(t("col_pub")) + "</th><th>" + esc(t("col_what")) + "</th><th>" + esc(t("col_how")) + "</th><th>" + esc(t("col_last")) + "</th></tr></thead><tbody>";
+    Object.keys(STATUS.connectors).forEach(function (cid) {
+      var c = STATUS.connectors[cid], lr = null;
+      (STATUS.runs || []).some(function (r) { var x = r.summary.connectors && r.summary.connectors[cid]; if (x) { lr = x; return true; } return false; });
+      var st = lr ? (lr.status === "ok" ? '<span class="badge ok">ok</span>' : '<span class="badge bad">' + esc(lr.status) + "</span>") : '<span class="badge">–</span>';
+      h += "<tr><td class=\"mono\">" + esc(cid) + "</td><td>" + esc(srcShort(c.publisher)) + "</td><td>" + esc(c.description) + "</td><td>" + esc(c.access) + "</td><td>" + st + (lr && lr.seconds ? ' <span class="muted">' + lr.seconds + " s</span>" : "") + "</td></tr>";
+    });
+    h += "</tbody></table></div></div>";
+    h += '<div><h3 class="section-title">' + esc(t("runs")) + '</h3><div class="tablewrap"><table class="data plain"><thead><tr><th>' + esc(t("col_run")) + "</th><th>" + esc(t("col_started")) + "</th><th>" + esc(t("col_type")) + "</th><th>" + esc(t("connectors")) + "</th><th>" + esc(t("col_changed")) + "</th></tr></thead><tbody>";
+    (STATUS.runs || []).forEach(function (r) {
+      var cs = r.summary.connectors || {}, ok = 0, bad = 0, ch = 0;
+      Object.keys(cs).forEach(function (k) { if (cs[k].status === "ok") ok++; else bad++; ch += (cs[k].changed_datasets || []).length + (cs[k].new_tables || []).length + (cs[k].changed_tables || []).length; });
+      h += "<tr><td>#" + r.id + "</td><td>" + esc((r.started_at || "").replace("T", " ").slice(0, 16)) + "</td><td>" + esc(r.kind) + "</td><td>" + ok + " ok" + (bad ? ", " + bad + " failed" : "") + "</td><td>" + big(ch) + "</td></tr>";
+    });
+    h += "</tbody></table></div></div><p class=\"muted\">" + esc(STATUS.schedule || "") + "</p>";
+    if (STATUS.backlog && STATUS.backlog.length) {
+      h += '<div><h3 class="section-title">' + esc(t("next_src")) + '</h3><p class="muted" style="margin-bottom:8px">' + esc(t("next_src_note")) + '</p><div class="tablewrap"><table class="data plain"><thead><tr><th>' + esc(t("f_source")) + "</th><th>Status</th></tr></thead><tbody>";
+      STATUS.backlog.forEach(function (b) {
+        var cls = b.status === "done" ? "ok" : b.status === "blocked" ? "bad" : "";
+        h += "<tr><td>" + esc(b.title) + (b.blocked_reason ? '<div class="muted" style="font-size:12.5px;white-space:normal">' + esc(b.blocked_reason) + "</div>" : "") + '</td><td><span class="badge ' + cls + '">' + esc(b.status) + "</span></td></tr>";
+      });
+      h += "</tbody></table></div></div>";
+    }
+  }
+  el.innerHTML = h;
+}
+function renderAbout() {
+  var el = $("view-about");
+  var A = {
+    en: [
+      ["What this is", "IMRS Data Hub brings the official public data about Uzbekistan into one searchable database. National sources: the Statistics Agency (every SIAT table, its open-data and gender portals, the national SDG platform, the regional statistics departments and the IMF-format National Summary Data Page); the Central Bank (exchange rates since 1994, monetary operations and money market, monetary and banking statistics, balance of payments, payment systems, open data); the Ministry of Economy and Finance (budget execution, local budgets, public debt and tax rates from imv.uz and openbudget.uz); the currency, stock and commodity exchanges; public procurement statistics; the State Assets Management Agency; the Ministry of Investment, Industry and Trade; Uzhydromet; the statistics tables that ministries, agencies and khokimiyats publish on gov.uz; and the national open-data portal data.egov.uz, with the datasets of about 180 ministries, committees, agencies, banks, state companies and khokimiyats. The World Bank, the IMF, the Asian Development Bank, the ILO and the UN are included as second sources."],
+      ["Cross-check", "The Cross-check page lines up key indicators as published by national agencies and by international organisations, and flags where they differ."],
+      ["How numbers are kept", "Values are stored exactly as the publisher released them. Each dataset records the official page, the source file, when the publisher last updated it, when it was collected, and a SHA-256 fingerprint of the file. When a publisher revises a past value, the old and new values are both kept in the database."],
+      ["Updates", "An update agent runs on the 1st and 15th of each month. It refreshes every source, picks up new tables, records revisions, and adds sources over time."],
+      ["Languages", "Dataset names and series labels appear in English, Russian, Uzbek Latin and Uzbek Cyrillic where the publisher provides them. Search matches any of them, in either script."],
+      ["Limits", "Some official websites refuse connections from outside Uzbekistan. The Open Data Portal data.egov.uz is loaded from a copy made on a computer in Uzbekistan (the date is on the Sources & updates page) and is refreshed when the collector runs there again; it also carries most datasets of the Customs and Tax Committees and of the ministries of agriculture and employment. Still missing: those bodies' own websites, the cadastre agency, the Excel attachments on gov.uz and three regional statistics sites. Data published only as PDF files or images is not collected. The Central Bank's open-data export stops at 80 records, so such tables are marked as possibly incomplete."],
+      ["How to cite", "Cite the original publisher. The Copy citation button on every dataset gives a ready reference with the retrieval date."]
+    ],
+    ru: [
+      ["Что это", "IMRS Data Hub собирает официальные открытые данные об Узбекистане в одну базу с поиском. Национальные источники: Агентство статистики (все таблицы SIAT, портал открытых данных и гендерной статистики, национальная платформа ЦУР, региональные управления статистики и Национальная сводная страница данных в формате МВФ); Центральный банк (курсы валют с 1994 года, денежно-кредитные операции и денежный рынок, денежно-кредитная и банковская статистика, платёжный баланс, платёжные системы, открытые данные); Министерство экономики и финансов (исполнение бюджета, местные бюджеты, государственный долг и ставки налогов с imv.uz и openbudget.uz); валютная, фондовая и товарно-сырьевая биржи; статистика госзакупок; Агентство по управлению госактивами; Министерство инвестиций, промышленности и торговли; Узгидромет; статистические таблицы, которые министерства, агентства и хокимияты публикуют на gov.uz; а также национальный портал открытых данных data.egov.uz с наборами около 180 министерств, комитетов, агентств, банков, госкомпаний и хокимиятов. Всемирный банк, МВФ, Азиатский банк развития, МОТ и ООН включены как вторые источники."],
+      ["Сверка источников", "На странице «Сверка источников» ключевые показатели национальных ведомств сопоставлены с данными международных организаций, а расхождения отмечены."],
+      ["Как хранятся цифры", "Значения хранятся точно так, как их опубликовал источник. Для каждого набора записаны официальная страница, исходный файл, дата обновления у источника, дата сбора и отпечаток SHA-256 файла. Если источник пересматривает прошлое значение, в базе сохраняются и старое, и новое."],
+      ["Обновления", "Агент обновления запускается 1-го и 15-го числа каждого месяца. Он обновляет все источники, находит новые таблицы, фиксирует пересмотры и со временем подключает новые источники."],
+      ["Языки", "Названия наборов и рядов показаны на английском, русском, узбекском (латиница и кириллица), если источник их публикует. Поиск работает на любом из них в любой графике."],
+      ["Ограничения", "Некоторые официальные сайты не принимают подключения из-за пределов Узбекистана. Портал открытых данных data.egov.uz загружается из копии, сделанной на компьютере в Узбекистане (дата указана на странице «Источники и обновления»), и обновляется, когда сборщик снова запускается там; на нём также есть большинство наборов Таможенного и Налогового комитетов и министерств сельского хозяйства и занятости. Пока отсутствуют: собственные сайты этих органов, кадастровое агентство, файлы Excel на gov.uz и три сайта региональных управлений статистики. Данные, опубликованные только в PDF или картинками, не собираются. Выгрузка открытых данных ЦБ ограничена 80 записями, такие таблицы помечены как возможно неполные."],
+      ["Как ссылаться", "Ссылайтесь на первоисточник. Кнопка «Копировать ссылку» на странице набора даёт готовую ссылку с датой обращения."]
+    ],
+    uz: [
+      ["Bu nima", "IMRS Data Hub O'zbekiston haqidagi rasmiy ochiq ma'lumotlarni bitta qidiruvli bazaga jamlaydi. Milliy manbalar: Statistika agentligi (SIATning barcha jadvallari, ochiq ma'lumotlar va gender statistikasi portallari, BRM milliy platformasi, hududiy statistika boshqarmalari va XVJ formatidagi Milliy umumlashtirilgan ma'lumotlar sahifasi); Markaziy bank (1994-yildan valyuta kurslari, pul-kredit operatsiyalari va pul bozori, pul-kredit va bank statistikasi, to'lov balansi, to'lov tizimlari, ochiq ma'lumotlar); Iqtisodiyot va moliya vazirligi (byudjet ijrosi, mahalliy byudjetlar, davlat qarzi va soliq stavkalari, imv.uz va openbudget.uz dan); valyuta, fond va tovar-xom ashyo birjalari; davlat xaridlari statistikasi; Davlat aktivlarini boshqarish agentligi; Investitsiyalar, sanoat va savdo vazirligi; O'zgidromet; vazirliklar, agentliklar va hokimliklar gov.uz da e'lon qiladigan statistik jadvallar; hamda data.egov.uz milliy ochiq ma'lumotlar portali — 180 ga yaqin vazirlik, qo'mita, agentlik, bank, davlat kompaniyasi va hokimlik to'plamlari. Jahon banki, XVJ, Osiyo taraqqiyot banki, XMT va BMT ikkinchi manba sifatida kiritilgan."],
+      ["Manbalarni solishtirish", "«Manbalarni solishtirish» sahifasida milliy idoralarning asosiy ko'rsatkichlari xalqaro tashkilotlar ma'lumotlari bilan yonma-yon qo'yilgan va farqlar belgilangan."],
+      ["Raqamlar qanday saqlanadi", "Qiymatlar manba e'lon qilganidek aynan saqlanadi. Har bir to'plam uchun rasmiy sahifa, manba fayli, manbada yangilangan sana, yig'ilgan sana va faylning SHA-256 izi yoziladi. Manba o'tgan qiymatni qayta ko'rib chiqsa, bazada eski va yangi qiymat ham saqlanadi."],
+      ["Yangilanishlar", "Yangilash agenti har oyning 1 va 15-sanasida ishga tushadi. U barcha manbalarni yangilaydi, yangi jadvallarni topadi, qayta ko'rib chiqishlarni qayd etadi va vaqt o'tishi bilan yangi manbalarni qo'shadi."],
+      ["Tillar", "To'plam va qator nomlari manba e'lon qilgan bo'lsa, ingliz, rus, o'zbek (lotin va kirill) tillarida ko'rsatiladi. Qidiruv ularning istalganida ishlaydi."],
+      ["Cheklovlar", "Ba'zi rasmiy saytlar O'zbekistondan tashqaridan ulanishni qabul qilmaydi. data.egov.uz ochiq ma'lumotlar portali O'zbekistondagi kompyuterda olingan nusxadan yuklanadi (sanasi «Manbalar va yangilanishlar» sahifasida) va yig'uvchi u yerda qayta ishga tushganda yangilanadi; unda Bojxona va Soliq qo'mitalari hamda qishloq xo'jaligi va bandlik vazirliklarining ko'pgina to'plamlari ham bor. Hozircha yo'q: bu organlarning o'z saytlari, kadastr agentligi, gov.uz dagi Excel fayllar va uchta hududiy statistika sayti. Faqat PDF yoki rasm ko'rinishida e'lon qilingan ma'lumotlar yig'ilmaydi. Markaziy bank ochiq ma'lumotlari 80 yozuv bilan cheklangan, bunday jadvallar to'liq bo'lmasligi mumkin deb belgilangan."],
+      ["Qanday iqtibos keltirish", "Asl manbaga havola bering. Har bir to'plamdagi «Iqtibosni nusxalash» tugmasi olingan sanasi bilan tayyor havolani beradi."]
+    ],
+    uzc: [
+      ["Бу нима", "IMRS Data Hub Ўзбекистон ҳақидаги расмий очиқ маълумотларни битта қидирувли базага жамлайди. Миллий манбалар: Статистика агентлиги (SIATнинг барча жадваллари, очиқ маълумотлар ва гендер статистикаси порталлари, БРМ миллий платформаси, ҳудудий статистика бошқармалари ва ХВЖ форматидаги Миллий умумлаштирилган маълумотлар саҳифаси); Марказий банк (1994 йилдан валюта курслари, пул-кредит операциялари ва пул бозори, пул-кредит ва банк статистикаси, тўлов баланси, тўлов тизимлари, очиқ маълумотлар); Иқтисодиёт ва молия вазирлиги (бюджет ижроси, маҳаллий бюджетлар, давлат қарзи ва солиқ ставкалари, imv.uz ва openbudget.uz дан); валюта, фонд ва товар-хом ашё биржалари; давлат харидлари статистикаси; Давлат активларини бошқариш агентлиги; Инвестициялар, саноат ва савдо вазирлиги; Ўзгидромет; вазирликлар, агентликлар ва ҳокимликлар gov.uz да эълон қиладиган статистик жадваллар; ҳамда data.egov.uz миллий очиқ маълумотлар портали — 180 га яқин вазирлик, қўмита, агентлик, банк, давлат компанияси ва ҳокимлик тўпламлари. Жаҳон банки, ХВЖ, Осиё тараққиёт банки, ХМТ ва БМТ иккинчи манба сифатида киритилган."],
+      ["Манбаларни солиштириш", "«Манбаларни солиштириш» саҳифасида миллий идораларнинг асосий кўрсаткичлари халқаро ташкилотлар маълумотлари билан ёнма-ён қўйилган ва фарқлар белгиланган."],
+      ["Рақамлар қандай сақланади", "Қийматлар манба эълон қилгандек айнан сақланади. Ҳар бир тўплам учун расмий саҳифа, манба файли, манбада янгиланган сана, йиғилган сана ва файлнинг SHA-256 изи ёзилади. Манба ўтган қийматни қайта кўриб чиқса, базада эски ва янги қиймат ҳам сақланади."],
+      ["Янгиланишлар", "Янгилаш агенти ҳар ойнинг 1 ва 15-санасида ишга тушади. У барча манбаларни янгилайди, янги жадвалларни топади, қайта кўриб чиқишларни қайд этади ва вақт ўтиши билан янги манбаларни қўшади."],
+      ["Тиллар", "Тўплам ва қатор номлари манба эълон қилган бўлса, инглиз, рус, ўзбек (лотин ва кирилл) тилларида кўрсатилади. Қидирув уларнинг исталганида ишлайди."],
+      ["Чекловлар", "Баъзи расмий сайтлар Ўзбекистондан ташқаридан уланишни қабул қилмайди. data.egov.uz очиқ маълумотлар портали Ўзбекистондаги компьютерда олинган нусхадан юкланади (санаси «Манбалар ва янгиланишлар» саҳифасида) ва йиғувчи у ерда қайта ишга тушганда янгиланади; унда Божхона ва Солиқ қўмиталари ҳамда қишлоқ хўжалиги ва бандлик вазирликларининг кўпгина тўпламлари ҳам бор. Ҳозирча йўқ: бу органларнинг ўз сайтлари, кадастр агентлиги, gov.uz даги Excel файллар ва учта ҳудудий статистика сайти. Фақат PDF ёки расм кўринишида эълон қилинган маълумотлар йиғилмайди. Марказий банк очиқ маълумотлари 80 ёзув билан чекланган, бундай жадваллар тўлиқ бўлмаслиги мумкин деб белгиланган."],
+      ["Қандай иқтибос келтириш", "Асл манбага ҳавола беринг. Ҳар бир тўпламдаги «Иқтибосни нусхалаш» тугмаси олинган санаси билан тайёр ҳаволани беради."]
+    ]
+  };
+  var items = A[state.lang] || A.en;
+  el.innerHTML = "<h2>" + esc(t("about")) + "</h2>" + items.map(function (x) { return '<div style="display:grid;gap:6px"><h3 class="section-title">' + esc(x[0]) + "</h3><p>" + esc(x[1]) + "</p></div>"; }).join("");
+}
+
+/* ---------- cross-check: one indicator, several sources ---------- */
+var CC = null, CCP = null, CC_BYDS = {}, CC_OPEN = -1;
+function loadCC() {
+  if (!CCP) {
+    CCP = getJSON("data/crosscheck.gz.txt").then(function (c) {
+      CC = c; CC_BYDS = {};
+      (c.indicators || []).forEach(function (ind, i) { ind.sources.forEach(function (sx) { (CC_BYDS[sx.ds] = CC_BYDS[sx.ds] || []).push(i); }); });
+      return c;
+    });
+    CCP.catch(function () { CCP = null; });
+  }
+  return CCP;
+}
+function fmtGap(g) {
+  if (!g || g.max == null) return "";
+  return g.kind === "abs" ? nf(g.max, 2) + " " + ["pp", "п.п.", "f.p.", "ф.п."][L()] : nf(g.max * 100, 1) + "%";
+}
+function ccBadge(g) {
+  if (!g || g.status === "single") return '<span class="badge">' + esc(t("cc_single")) + "</span>";
+  return g.status === "agree" ? '<span class="badge ok">' + esc(t("cc_agree")) + "</span>" : '<span class="badge warn">' + esc(t("cc_differs", { g: fmtGap(g) })) + "</span>";
+}
+function renderCompare() {
+  var el = $("view-compare");
+  if (!CC) {
+    el.innerHTML = "<h2>" + esc(t("cc_title")) + '</h2><p class="muted">' + esc(t("loading")) + "</p>";
+    loadCC().then(function () { if (state.view === "compare") renderCompare(); }, function (e) { el.innerHTML = "<h2>" + esc(t("cc_title")) + '</h2><p class="note">' + esc(e.message) + "</p>"; });
+    return;
+  }
+  var inds = CC.indicators || [], nA = 0, nD = 0;
+  inds.forEach(function (ind) { if (ind.gap && ind.gap.status === "agree") nA++; else if (ind.gap && ind.gap.status === "differs") nD++; });
+  var h = "<h2>" + esc(t("cc_title")) + "</h2><p>" + esc(t("cc_intro")) + '</p><p class="muted">' + esc(t("cc_summary", { n: inds.length, a: nA, d: nD })) + "</p>";
+  h += '<div id="cc-detail"></div>';
+  h += '<div class="tablewrap" style="max-height:none"><table class="data plain cc"><thead><tr><th>' + esc(t("cc_indicator")) + "</th><th>" + esc(t("cc_latest")) + "</th><th>" + esc(t("cc_values")) + "</th><th>" + esc(t("cc_gap")) + "</th></tr></thead><tbody>";
+  var lastTheme = null;
+  inds.forEach(function (ind, i) {
+    if (ind.t !== lastTheme) { lastTheme = ind.t; h += '<tr><td colspan="4" style="background:var(--surface-2);font-weight:600;font-size:12.5px">' + esc(themeName(ind.t)) + "</td></tr>"; }
+    var g = ind.gap || {}, pi = g.period ? ind.p.indexOf(g.period) : -1;
+    var vals = ind.sources.map(function (sx, k) { var v = pi >= 0 ? ind.v[k][pi] : null; return v == null ? "" : '<div class="ccv"><span class="muted">' + esc(sx.tag || srcShort(sx.src)) + ":</span> " + esc(nf(v)) + "</div>"; }).join("");
+    h += '<tr' + (i === CC_OPEN ? ' class="on"' : "") + '><td><button class="linkbtn" style="text-align:left;font-size:14px" data-cc="' + i + '">' + esc(pick(ind.n)) + '</button><div class="muted" style="font-size:12px">' + esc(pick(ind.unit)) + "</div></td><td>" + esc(g.period ? fmtPeriod(g.period) : "–") + "</td><td>" + (vals || "–") + "</td><td>" + ccBadge(g) + "</td></tr>";
+  });
+  h += "</tbody></table></div>";
+  el.innerHTML = h;
+  Array.prototype.forEach.call(el.querySelectorAll("[data-cc]"), function (b) { b.onclick = function () { openCC(+b.getAttribute("data-cc")); }; });
+  if (CC_OPEN >= 0) drawCC(CC_OPEN);
+}
+function openCC(i) {
+  CC_OPEN = i;
+  try { history.replaceState(null, "", "#c-" + i); } catch (e) {}
+  if (state.view !== "compare") setView("compare", true); else renderCompare();
+  var box = $("cc-detail"); if (box && box.scrollIntoView) box.scrollIntoView({ block: "start", behavior: "smooth" });
+}
+function drawCC(i) {
+  var ind = CC.indicators[i], box = $("cc-detail"); if (!ind || !box) return;
+  var g = ind.gap || {};
+  var h = '<div class="cc-detail"><div><h3>' + esc(pick(ind.n)) + '</h3><div class="muted" style="font-size:13px">' + esc(pick(ind.unit)) + (g.tol != null ? " · " + esc(t("cc_tol", { g: g.kind === "abs" ? nf(g.tol, 2) + " " + ["pp", "п.п.", "f.p.", "ф.п."][L()] : nf(g.tol * 100, 1) + "%" })) : "") + "</div></div>";
+  if (ind.note) h += '<p class="note info" style="margin:0">' + esc(pick(ind.note)) + "</p>";
+  h += '<div class="chart-box" id="cc-chart"></div><div class="legend" id="cc-legend"></div>';
+  var P = ind.p, cols = [];
+  for (var k = P.length - 1; k >= 0 && cols.length < 12; k--) { if (ind.v.some(function (vv) { return vv[k] != null; })) cols.push(k); }
+  cols.reverse();
+  h += '<div class="tablewrap"><table class="data"><thead><tr><th>' + esc(t("series")) + "</th>" + cols.map(function (k) { return "<th>" + esc(fmtPeriod(P[k])) + "</th>"; }).join("") + "</tr></thead><tbody>";
+  ind.sources.forEach(function (sx, si) {
+    h += '<tr><td><span class="swatch" style="display:inline-block;margin-right:6px;background:var(' + COLORS[si % 8] + ')"></span>' + esc(srcShort(sx.src) + (sx.tag && sx.tag !== srcShort(sx.src) ? " · " + sx.tag : "")) + (si === 0 ? ' <span class="muted">(' + esc(t("cc_ref")) + ")</span>" : "") + '<div class="muted" style="font-size:12px">' + esc(pick(sx.l) || "") + '</div><button class="linkbtn" data-open2="' + esc(sx.ds) + '">' + esc(t("cc_open")) + " →</button></td>" + cols.map(function (k) { return "<td>" + esc(nf(ind.v[si][k])) + "</td>"; }).join("") + "</tr>";
+  });
+  if (ind.gaps) h += '<tr><td class="muted">' + esc(t("cc_gap")) + "</td>" + cols.map(function (k) { var x = ind.gaps[k]; return '<td class="muted">' + (x == null ? "" : esc(ind.gap && ind.gap.kind === "abs" ? nf(x, 2) : nf(x * 100, 1) + "%")) + "</td>"; }).join("") + "</tr>";
+  h += "</tbody></table></div></div>";
+  box.innerHTML = h;
+  Array.prototype.forEach.call(box.querySelectorAll("[data-open2]"), function (b) { b.onclick = function () { setView("browse"); openDataset(b.getAttribute("data-open2")); }; });
+  ccChart(ind);
+}
+function ccChart(ind) {
+  var box = $("cc-chart"), leg = $("cc-legend"); if (!box) return;
+  var P = ind.p, idx = [];
+  for (var i = 0; i < P.length; i++) { if (ind.v.some(function (vv) { return vv[i] != null; })) idx.push(i); }
+  if (!idx.length) { box.innerHTML = ""; return; }
+  var W = Math.max(320, box.clientWidth || 720), H = Math.round(Math.min(340, Math.max(220, W * 0.4)));
+  var padL = 62, padR = 16, padT = 12, padB = 30, vmin = Infinity, vmax = -Infinity;
+  ind.v.forEach(function (vv) { idx.forEach(function (k) { var v = vv[k]; if (v != null) { if (v < vmin) vmin = v; if (v > vmax) vmax = v; } }); });
+  var ticks = niceTicks(vmin, vmax, 5), y0 = ticks[0], y1 = ticks[ticks.length - 1], n = idx.length, pw = W - padL - padR, ph = H - padT - padB;
+  function X(k) { return padL + (n === 1 ? pw / 2 : k * pw / (n - 1)); }
+  function Y(v) { return padT + ph - (v - y0) / ((y1 - y0) || 1) * ph; }
+  var svg = '<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="' + esc(pick(ind.n)) + '">';
+  ticks.forEach(function (tv) { var y = Y(tv); svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + y + '" y2="' + y + '" stroke="var(--grid)"/><text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="11" fill="var(--muted)">' + esc(nf(tv, Math.abs(y1 - y0) < 10 ? 2 : 0)) + "</text>"; });
+  var nt = Math.min(n, Math.max(2, Math.floor(pw / 90))), lastX = -1e9;
+  for (var q = 0; q < nt; q++) { var k = Math.round(q * (n - 1) / Math.max(1, nt - 1)), x = X(k); if (x - lastX < 70) continue; lastX = x; svg += '<text x="' + x + '" y="' + (H - 9) + '" text-anchor="' + (q === 0 ? "start" : q === nt - 1 ? "end" : "middle") + '" font-size="11" fill="var(--muted)">' + esc(fmtPeriod(P[idx[k]])) + "</text>"; }
+  ind.v.forEach(function (vv, si) {
+    var seg = "", pts = [];
+    for (var k = 0; k < n; k++) { var v = vv[idx[k]]; if (v == null) { if (pts.length) { seg += "M" + pts.join("L"); pts = []; } continue; } pts.push(X(k).toFixed(1) + "," + Y(v).toFixed(1)); }
+    if (pts.length) seg += "M" + pts.join("L");
+    svg += '<path d="' + seg + '" fill="none" stroke="var(' + COLORS[si % 8] + ')" stroke-width="' + (si === 0 ? 2.5 : 2) + '" stroke-linejoin="round" stroke-linecap="round"' + (si === 0 ? "" : ' stroke-dasharray="' + (si % 2 ? "6 3" : "2 3") + '"') + "/>";
+  });
+  svg += '<line x1="' + padL + '" x2="' + (W - padR) + '" y1="' + (padT + ph) + '" y2="' + (padT + ph) + '" stroke="var(--rule-strong)"/>';
+  svg += '<line id="ccxh" x1="0" x2="0" y1="' + padT + '" y2="' + (padT + ph) + '" stroke="var(--rule-strong)" visibility="hidden"/><rect id="cchit" x="' + padL + '" y="' + padT + '" width="' + pw + '" height="' + ph + '" fill="transparent"/></svg>';
+  box.innerHTML = svg;
+  leg.innerHTML = ind.sources.map(function (sx, si) { return '<span><i style="background:var(' + COLORS[si % 8] + ')"></i>' + esc(sx.tag || srcShort(sx.src)) + "</span>"; }).join("");
+  var hit = box.querySelector("#cchit"), xh = box.querySelector("#ccxh"), tip = $("tip");
+  hit.addEventListener("pointermove", function (ev) {
+    var r = box.querySelector("svg").getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+    var k = n === 1 ? 0 : Math.round((sx - padL) / pw * (n - 1)); k = Math.max(0, Math.min(n - 1, k));
+    var x = X(k); xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+    var hh = "<b>" + esc(fmtPeriod(P[idx[k]])) + "</b>";
+    ind.sources.forEach(function (s2, si) { hh += '<div class="tr"><i style="background:var(' + COLORS[si % 8] + ')"></i><span>' + esc(s2.tag || srcShort(s2.src)) + ": <b>" + esc(nf(ind.v[si][idx[k]])) + "</b></span></div>"; });
+    tip.innerHTML = hh; tip.hidden = false;
+    var tx = ev.clientX + 14, ty = ev.clientY + 14, tr = tip.getBoundingClientRect();
+    if (tx + tr.width > innerWidth - 8) tx = ev.clientX - tr.width - 14;
+    if (ty + tr.height > innerHeight - 8) ty = ev.clientY - tr.height - 14;
+    tip.style.left = tx + "px"; tip.style.top = ty + "px";
+  });
+  hit.addEventListener("pointerleave", function () { tip.hidden = true; xh.setAttribute("visibility", "hidden"); });
+}
+var NOWCAST_JS = null;
+function ensureNowcast() {
+  if (window.NOWCAST) return Promise.resolve(window.NOWCAST);
+  if (!NOWCAST_JS) NOWCAST_JS = new Promise(function (res, rej) {
+    var sc = document.createElement("script"); sc.src = "nowcast.js";
+    sc.onload = function () { window.NOWCAST ? res(window.NOWCAST) : rej(new Error("nowcast.js did not start")); };
+    sc.onerror = function () { NOWCAST_JS = null; rej(new Error("nowcast.js could not be loaded")); };
+    document.head.appendChild(sc);
+  });
+  return NOWCAST_JS;
+}
+function setView(v, keepHash, sub) {
+  state.view = v;
+  ["browse", "nowcast", "compare", "sources", "about"].forEach(function (k) { $("view-" + k).hidden = k !== v; $("tab-" + k).setAttribute("aria-selected", k === v ? "true" : "false"); });
+  if (v === "nowcast") {
+    ensureNowcast().then(function (N) { if (state.view !== "nowcast") return; if (sub) N.go(sub); else N.render(); },
+      function (e) { $("view-nowcast").innerHTML = '<p class="note">' + esc(e.message) + "</p>"; });
+    if (!keepHash && !sub) { try { history.replaceState(null, "", "#nowcast"); } catch (e) {} }
+    return;
+  }
+  if (v === "sources") renderSources();
+  if (v === "about") renderAbout();
+  if (v === "compare") renderCompare();
+  if (v !== "browse" && !keepHash) { try { history.replaceState(null, "", "#" + v); } catch (e) {} }
+  else if (!state.sel) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+}
+
+
+/* ---------- ask the data (Claude via the sample capability) ---------- */
+var SAMPLE = null, ASK = { ctl: null, text: "", live: "", cut: 0, steps: [], msg: "", q: "" };
+function searchCatalog(q, regionalOnly, limit) {
+  var region = null;
+  var kept = norm(q).split(" ").filter(function (tk) { var r = regionOf(tk); if (r) { region = r; return false; } return true; });
+  var vs = variants(kept.join(" ")), out = [];
+  IDX.forEach(function (e) {
+    if ((regionalOnly || region) && !(e.d.r >= 1)) return;
+    var best = 0;
+    if (!kept.length) best = 1; else for (var i = 0; i < vs.length; i++) { var sc = scoreEntry(e, vs[i]); if (sc > best) best = sc; }
+    if (best > 0) out.push({ d: e.d, s: best + (e.d.lp && e.d.lp >= "2025" ? 0.4 : 0) + (isIntl(e.d.s) ? 0 : 0.5) + (FEAT[e.d.id] ? 0.5 : 0) });
+  });
+  out.sort(function (a, b) { return b.s - a.s || (b.d.lp || "").localeCompare(a.d.lp || ""); });
+  return { region: region, items: out.slice(0, limit || 12).map(function (x) { return x.d; }) };
+}
+var ASK_TOOLS = [
+  { name: "search_datasets",
+    description: "Search the IMRS Data Hub catalogue of official public data on Uzbekistan: Statistics Agency (SIAT tables, open data, SDG, gender, regional departments), Central Bank, Ministry of Economy and Finance (budget, debt), the currency, stock and commodity exchanges, procurement, state assets, ministries and khokimiyats on gov.uz, plus international second sources (World Bank, IMF, ADB, ILO, UN). Returns up to 12 datasets: id, name, publisher, whether the publisher is national or international, frequency, first and last period, number of series, unit, and whether rows include regions or districts. Use short keyword queries in English or Russian; a region name in the query keeps only tables with regional rows.",
+    inputSchema: { type: "object", properties: { query: { type: "string" }, regional_only: { type: "boolean" } }, required: ["query"] },
+    execute: function (input) {
+      var q = String(input.query || "");
+      askStep("search", q);
+      var r = searchCatalog(q, !!input.regional_only, 12);
+      return { region_code: r.region, datasets: r.items.map(function (d) { return { id: d.id, name: d.n[0] || d.n[1] || d.n[2], publisher: srcShort(d.s), publisher_type: isIntl(d.s) ? "international estimate" : "national official", frequency: d.f, first: d.fp, last: d.lp, series: d.ns, breakdown: d.r === 2 ? "regions and districts" : d.r === 1 ? "regions" : "national", unit: d.u }; }) };
+    } },
+  { name: "get_data",
+    description: "Get values from one dataset by id. Returns unit, the latest periods, and the rows (series) whose label or code contains `series` (for example a region name, 'Republic of Uzbekistan', a product or currency code); without `series` it returns the first rows. Each row's values align with `periods`; null means no value.",
+    inputSchema: { type: "object", properties: { dataset_id: { type: "string" }, series: { type: "string" }, periods: { type: "integer", description: "Number of latest periods, default 12, at most 40" } }, required: ["dataset_id"] },
+    execute: function (input) {
+      var id = String(input.dataset_id || ""), d = BYID[id];
+      if (!d) throw new Error("Unknown dataset id " + id + ". Use search_datasets first.");
+      askStep("read", id);
+      return loadShard(d.sh).then(function (sh) {
+        var data = sh[id];
+        if (!data.r) {
+          var f = norm(String(input.series || ""));
+          var rows = data.rows.filter(function (r) { return !f || norm(r.join(" ")).indexOf(f) >= 0; }).slice(0, 25);
+          return { id: id, name: d.n[0], publisher: srcFull(d.s), columns: data.cols, rows: rows, total_rows: data.rows.length, page: data.m.page };
+        }
+        var n = Math.max(1, Math.min(40, parseInt(input.periods, 10) || 12));
+        var want = norm(String(input.series || "")), reg = null;
+        want.split(" ").forEach(function (tk) { var r = regionOf(tk); if (r) reg = r; });
+        var picked = [];
+        data.r.forEach(function (r, i) {
+          var hay = norm((r.l || []).join(" ") + " " + (r.c || r.k));
+          if (!want || hay.indexOf(want) >= 0 || (reg && String(r.c || r.k) === reg)) picked.push(i);
+        });
+        if (!picked.length) picked = data.r.slice(0, 1).map(function (_, i) { return i; });
+        picked.sort(function (a, b) {
+          function rank(k) { var c = String(data.r[k].c || data.r[k].k); return c === reg ? 0 : c === "1700" ? 1 : /^17\d\d$/.test(c) ? 2 : 3; }
+          return rank(a) - rank(b) || a - b;
+        });
+        picked = picked.slice(0, 15);
+        var cols = [];
+        for (var i = data.p.length - 1; i >= 0 && cols.length < n; i--) { if (picked.some(function (k) { return data.r[k].v[i] != null; })) cols.push(i); }
+        cols.reverse();
+        var ytd = YTD_IDS[id] || data.p.some(function (p) { return /-C\d\d$/.test(p); });
+        return { id: id, name: d.n[0], publisher: srcFull(d.s), unit: pick(data.m.unit) || d.u, updated_at_source: data.m.src_upd, page: data.m.page,
+          period_basis: ytd ? "Year to date: each value covers January to the end of its period (Q1 = January-March, Q2 = January-June, Q3 = January-September, Q4 = the whole year; a monthly value = January to that month); growth rates in such tables compare with the same months a year earlier." : undefined,
+          total_series: data.r.length, periods: cols.map(function (i) { return data.p[i]; }),
+          series: picked.map(function (k) { var r = data.r[k]; return { label: r.l[0] || r.l[1] || r.k, code: r.c || r.k, unit: r.u || undefined, values: cols.map(function (i) { return r.v[i]; }) }; }) };
+      });
+    } }
+];
+/* SIAT tables published cumulatively from January (national accounts by quarter, monthly industry,
+   construction, trade and services growth): get_data says so, because the dataset names do not. */
+var YTD_IDS = { "siat-3695": 1, "siat-3696": 1, "siat-3698": 1, "siat-3699": 1, "siat-3700": 1, "siat-562": 1, "siat-577": 1, "siat-2406": 1, "siat-2696": 1, "siat-2700": 1, "siat-3216": 1 };
+/* Where to look first: well-known tables, so the answer does not depend on search luck. */
+var ASK_GUIDE = "Tables to try first (check the unit and the period returned):\n" +
+  "- Inflation, % compared with the same month a year earlier: siat-4689 (series 'Cumulative index' is all items; by region: siat-4692). Since December: siat-4688. Month on month: siat-1286. Core inflation: cbu-st-bulletin-1-3.\n" +
+  "- Central Bank policy rate: cbu-policy-rate. Official exchange rates (daily, series USD, EUR, RUB): cbu-fx-daily.\n" +
+  "- GDP: annual growth siat-582, annual level siat-1920; quarterly growth siat-3698 and level siat-3695. SIAT's quarterly GDP and most monthly growth rates (industry siat-577, construction siat-2406, retail siat-2700, services siat-3216) are cumulative from January: a Q2 value covers January to June compared with January to June of the previous year. Say so when you quote them.\n" +
+  "- Unemployment by region (annual): siat-1875. Resident population: siat-246. Budget: ob-consolidated-budget. Public debt: ob-debt-overview. Merchandise trade: nsdp-met.\n" +
+  "Index values (100 = no change) are growth plus 100: quote 106.2 as '6.2% higher than a year earlier', never as '106.2% inflation'.\n";
+function askStatus(msg) { var el = $("ask-status"); if (el) el.textContent = msg; }
+/* With tools, the text Claude writes before each tool call (its working notes) arrives in the same
+   stream as the answer. Everything written before the last tool call is cut from what is shown. */
+function askStep(kind, what) {
+  ASK.cut = (ASK.live || "").length;
+  ASK.steps.push(kind === "search" ? "🔎 " + what : "📄 " + what);
+  askStatus(kind === "search" ? t("searching", { q: what }) : t("reading", { n: BYID[what] ? dsName(BYID[what]) : what }));
+  showSteps();
+}
+function showSteps() { var el = $("ask-steps"); if (el) { el.hidden = !ASK.steps.length; el.textContent = t("ask_steps", { s: ASK.steps.join(" · ") }); } }
+function answerPart(text) { var a = String(text || "").slice(ASK.cut || 0).replace(/^\s+/, ""); return a || String(text || "").trim(); }
+function renderAsk() {
+  state.sel = null; state.askOpen = true;
+  if (isNarrow() && !document.body.classList.contains("show-detail")) state.listY = window.scrollY;
+  document.body.classList.add("show-detail");
+  var ex = [["Unemployment in Samarkand region since 2020", "Безработица в Самаркандской области с 2020 года", "2020-yildan beri Samarqand viloyatida ishsizlik", "2020 йилдан бери Самарқанд вилоятида ишсизлик"],
+    ["Latest inflation and the policy rate", "Последняя инфляция и основная ставка", "So'nggi inflyatsiya va asosiy stavka", "Сўнгги инфляция ва асосий ставка"],
+    ["Which regions grew industry fastest this year?", "Где быстрее всего растёт промышленность в этом году?", "Bu yil sanoat qaysi hududlarda tez o'sdi?", "Бу йил саноат қайси ҳудудларда тез ўсди?"]];
+  $("detail").innerHTML = '<div class="ask">' + backBtns() + "<h2 style=\"margin:0;font-size:1.25rem\">" + esc(t("ask_title")) + '</h2><textarea id="ask-q" placeholder="' + esc(t("ask_ph")) + '">' + esc(ASK.q) + '</textarea><div class="examples">' + ex.map(function (e) { return "<button data-ex=\"" + esc(pick(e)) + "\">" + esc(pick(e)) + "</button>"; }).join("") + '</div><div class="ask-row"><button class="btn primary" id="ask-go">' + esc(t("ask_btn")) + '</button><button class="btn" id="ask-stop" hidden>' + esc(t("stop")) + '</button><span class="ask-status" id="ask-status"></span></div><div class="answer" id="ask-out" hidden></div><p class="muted" id="ask-steps" style="margin:0;font-size:12.5px" hidden></p><p class="muted" style="margin:0;font-size:12.5px">' + esc(t("ask_note")) + "</p></div>";
+  bindBack();
+  if (ASK.text) showAnswer(ASK.text);
+  showSteps();
+  if (ASK.msg) askStatus(ASK.msg);
+  Array.prototype.forEach.call(document.querySelectorAll("[data-ex]"), function (b) { b.onclick = function () { $("ask-q").value = b.getAttribute("data-ex"); $("ask-q").focus(); }; });
+  $("ask-go").onclick = runAsk;
+  $("ask-stop").onclick = function () { if (ASK.ctl) ASK.ctl.abort(); };
+  $("ask-q").addEventListener("keydown", function (e) { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) runAsk(); });
+  detailToTop();
+  try { $("ask-q").focus({ preventScroll: true }); } catch (e) {}
+}
+function showAnswer(text) {
+  var el = $("ask-out"); if (!el) return;
+  el.hidden = !String(text || "").trim();
+  el.innerHTML = esc(text).replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/^#{1,4} +/gm, "")
+    .replace(/\[([a-z]+(?:-[A-Za-z0-9._]+)+)\]/g, function (m, id) { return BYID[id] ? '<button class="cite" data-open="' + id + '">' + id + "</button>" : m; });
+}
+function runAsk() {
+  var q = ($("ask-q").value || "").trim(); if (!q) { $("ask-q").focus(); return; }
+  if (!SAMPLE) { askStatus(t("ask_off")); return; }
+  ASK.q = q; ASK.text = ""; ASK.live = ""; ASK.cut = 0; ASK.steps = []; ASK.msg = "";
+  showAnswer(""); showSteps();
+  var lang = ["English", "Russian", "Uzbek (Latin script)", "Uzbek (Cyrillic script)"][L()];
+  var prompt = "You answer questions about the official statistics of Uzbekistan for researchers at the Institute for Macroeconomic and Regional Studies, using ONLY the IMRS Data Hub tools. " +
+    "Call the tools first and write nothing before your final answer. Use search_datasets (short keyword queries, try English and Russian terms) and get_data; prefer the most recent and most specific table, and prefer national official publishers; use international estimates (World Bank, IMF, ADB, ILO, UN) only as second sources and say so. " +
+    "Then answer in " + lang + " in 2 to 6 sentences: give the key numbers with units and periods, and mention the publisher. Cite every dataset you used as [dataset-id], for example [siat-544]. Write plain text: no Markdown (no **, #, tables or bullet symbols). When get_data returns period_basis, describe the figures that way (for example 'January-June 2026 compared with January-June 2025'). " +
+    "Report numbers exactly as returned; do not estimate or invent. Growth tables often give an index where 100 means no change (108.5 = +8.5%); say which comparison a figure is (year on year, since December, month on month, or year to date). If the hub has no suitable data, say so plainly.\n\n" +
+    ASK_GUIDE + "\nToday is " + new Date().toISOString().slice(0, 10) + ".\n\nQuestion: " + q;
+  ASK.ctl = new AbortController();
+  $("ask-go").disabled = true; $("ask-stop").hidden = false; askStatus(t("thinking"));
+  function done() { var g = $("ask-go"); if (g) { g.disabled = false; $("ask-stop").hidden = true; } }
+  var call;
+  try { call = SAMPLE(prompt, { tools: ASK_TOOLS, signal: ASK.ctl.signal, onText: function (u) { ASK.live = u.text; ASK.text = answerPart(u.text); showAnswer(ASK.text); } }); }
+  catch (e) { call = Promise.reject({ code: "upstream_error", message: String(e && e.message || e) }); }
+  Promise.resolve(call)
+    .then(function (r) { ASK.live = r.text; ASK.text = answerPart(r.text); showAnswer(ASK.text); askStatus(r.truncated ? t("ask_err", { c: "truncated" }) : ""); },
+      function (e) {
+        e = e || {};
+        if (e.text) { ASK.text = answerPart(e.text); showAnswer(ASK.text); }
+        if (e.code === "cancelled") { askStatus(""); return; }
+        var msg = e.code === "not_granted" ? t("ask_denied") : (e.code === "sampling_disabled" || e.code === "tools_unavailable" || e.code === "not_declared" || e.code === "capability_disabled" || e.code === "capability_removed") ? t("ask_off")
+          : e.code === "rate_limited" ? t("ask_limit") : e.code === "session_expired" ? t("ask_signin") : t("ask_err", { c: e.code || "error" });
+        ASK.msg = msg; askStatus(msg);
+        if (window.console) console.warn("Ask the data:", e.code, e.message);
+      })
+    .then(done, done);
+}
+$("askbtn").addEventListener("click", function () { if (state.view !== "browse") setView("browse"); renderAsk(); });
+
+/* ---------- events ---------- */
+var qTimer;
+$("q").addEventListener("input", function (e) { clearTimeout(qTimer); qTimer = setTimeout(function () { state.q = e.target.value; state.shown = 50; search(); renderResults(); }, 120); });
+$("results").addEventListener("click", function (e) { var li = e.target.closest(".res"); if (li) openDataset(li.getAttribute("data-id")); });
+$("more").addEventListener("click", function () { state.shown += 50; renderResults(); });
+$("detail").addEventListener("click", function (e) {
+  var o = e.target.closest("[data-open]"); if (o) { openDataset(o.getAttribute("data-open")); return; }
+  var cc = e.target.closest("[data-ccopen]"); if (cc) { openCC(+cc.getAttribute("data-ccopen")); return; }
+  var th = e.target.closest("[data-theme]"); if (th) { state.f.t = th.getAttribute("data-theme"); state.shown = 50; search(); renderFilters(); renderResults(); renderLanding(); }
+});
+Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (b) { b.addEventListener("click", function () {
+  var v = b.getAttribute("data-view");
+  if (v === "browse" && state.view === "browse" && CAT && (state.sel || state.askOpen)) { closeDetail(); window.scrollTo(0, 0); return; }   // Browse again = back to the overview
+  setView(v);
+}); });
+Array.prototype.forEach.call(document.querySelectorAll(".langs button"), function (b) { b.addEventListener("click", function () { state.lang = b.getAttribute("data-lang"); try { localStorage.setItem("uzdh-lang", state.lang); } catch (e) {} applyLang(); }); });
+var rsT; window.addEventListener("resize", function () { clearTimeout(rsT); rsT = setTimeout(function () { setTopHeight(); if (state.sel && VIEW.data) { drawChart(BYID[state.sel], VIEW.data); drawRegions(BYID[state.sel], VIEW.data); } }, 150); });
+/* Errors never fail silently: the viewer sees what went wrong. */
+var lastErr = 0;
+function reportError(msg) { if (Date.now() - lastErr < 4000) return; lastErr = Date.now(); try { toast(t("err_any", { m: String(msg || "error").slice(0, 160) })); } catch (e) {} }
+window.addEventListener("error", function (e) { if (e && e.message) reportError(e.message); });
+window.addEventListener("unhandledrejection", function (e) { var r = e && e.reason; if (r && r.code === "cancelled") return; reportError(r && (r.message || r.code) || r); });
+
+function routeHash() {
+  var h = (location.hash || "").replace("#", "");
+  if (h.indexOf("d-") === 0 && BYID[h.slice(2)]) { if (state.view !== "browse") setView("browse"); if (state.sel !== h.slice(2)) openDataset(h.slice(2), false); }
+  else if (h.indexOf("c-") === 0) { loadCC().then(function () { var i = +h.slice(2); if (CC.indicators[i]) { CC_OPEN = i; setView("compare", true); } }, function () {}); }
+  else if (h === "sources" || h === "about" || h === "browse" || h === "compare") setView(h);
+  else if (h === "nowcast" || h.indexOf("nowcast/") === 0) setView("nowcast", true, h.slice(8) || "overview");
+}
+window.addEventListener("hashchange", function () { if (CAT) routeHash(); });
+
+/* ---------- helpers shared with nowcast.js ---------- */
+window.HUB = {
+  esc: esc, t: t, pick: pick, nf: nf, big: big, L: L, state: state, niceTicks: niceTicks, getJSON: getJSON, loadShard: loadShard,
+  byId: function (id) { return BYID[id]; }, cat: function () { return CAT; }, sample: function () { return SAMPLE; },
+  save: function (name, data) { if (!DL && NATIVE) { nativeSave(name, data); return; } if (!DL) { allowDownloads(function () { saveFile(name, data); }); return; } saveFile(name, data); },
+  allowDownloads: allowDownloads,
+  toast: toast, fmtPeriod: fmtPeriod, srcShort: srcShort, dsName: dsName, searchCatalog: searchCatalog, tip: function () { return $("tip"); },
+  openDataset: function (id) { setView("browse"); openDataset(id); },
+  xlsx: withXlsx, canSave: function () { return !!DL || NATIVE; }
+};
+
+/* ---------- turning downloads on for a viewer who has them off ---------- */
+var CAN_ASK = !!(window.claude && typeof window.claude.use === "function");
+var NATIVE = !CAN_ASK;
+function redrawDetail() { if (state.sel && VIEW.data) drawDetail(BYID[state.sel], VIEW.data); }
+function recheckDownloads(then, reloadIfNull) {
+  window.claude.use("downloads").then(function (ns) {
+    if (ns) { DL = ns; redrawDetail(); if (then) then(); }
+    else if (reloadIfNull) { try { location.reload(); } catch (e) { toast(t("dl_still_off")); } }
+    else toast(t("dl_unavail"), 12000);
+  }, function () { toast(t("dl_unavail"), 12000); });
+}
+/* The permission state says why downloads are off: "unavailable" = this view cannot save files at all
+   (nothing the viewer can switch on), "denied" = refused earlier (the Permissions panel turns it back on),
+   "prompt" = ask now, "granted" = allowed, so a reload picks it up. */
+function allowDownloads(then) {
+  if (typeof then !== "function") then = null;
+  if (!CAN_ASK) { toast(t("dl_unavail"), 12000); return; }
+  window.claude.use("permissions").then(function (P) {
+    if (!P) { toast(t("dl_unavail"), 12000); return; }
+    P.state("downloads").then(function (st) {
+      if (window.console) console.info("downloads permission:", st);
+      if (st === "unavailable") { toast(t("dl_unavail"), 12000); return; }
+      if (st === "granted") { recheckDownloads(then, true); return; }
+      if (st === "denied") { P.manage().then(function () { P.state("downloads").then(function (s2) { if (s2 === "granted") recheckDownloads(then, true); else toast(t("dl_still_off")); }); }, function () { toast(t("dl_still_off")); }); return; }
+      P.request(["downloads"]).then(function (r) { var s2 = r && r.downloads; if (s2 === "granted") recheckDownloads(then, true); else if (s2 === "unavailable") toast(t("dl_unavail"), 12000); else toast(t("dl_still_off")); }, function () { toast(t("dl_still_off")); });
+    }, function () { toast(t("dl_unavail"), 12000); });
+  }, function () { toast(t("dl_unavail"), 12000); });
+}
+
+/* ---------- boot ---------- */
+applyLang();
+setTopHeight();
+if (window.claude && typeof window.claude.use === "function") {
+  window.claude.use("downloads").then(function (ns) { DL = ns || null; if (state.sel && VIEW.data) drawDetail(BYID[state.sel], VIEW.data); }, function () {});
+  window.claude.use("sample").then(function (fn) {
+    if (!fn) return;
+    fn.limits().then(function (lim) { if (lim && lim.tools) { SAMPLE = fn; $("askbtn").hidden = false; } }, function () {});
+  }, function () {});
+}
+getJSON("data/catalog.gz.txt").then(function (cat) {
+  CAT = cat; buildIndex(); search(); applyLang();
+  routeHash();
+  loadCC().then(function () { if (state.sel && VIEW.data && VIEW.id === state.sel) drawDetail(BYID[state.sel], VIEW.data); }, function () {});
+  fetch("data/status.json").then(function (r) { return r.ok ? r.json() : null; }).then(function (s) { STATUS = s; if (state.view === "sources") renderSources(); }, function () {});
+}).catch(function (e) {
+  $("results").innerHTML = '<li class="empty">Could not load the catalogue (' + esc(e.message) + "). Reload the page to try again.</li>";
+  $("stats").textContent = "";
+});
+})();
+</script>
